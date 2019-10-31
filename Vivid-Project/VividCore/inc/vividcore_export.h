@@ -1,0 +1,1 @@
+#define VIVIDCORE_EXPORT

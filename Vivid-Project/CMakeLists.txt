@@ -1,0 +1,5 @@
+cmake_minimum_required (VERSION 3.8)
+project (VividProject  LANGUAGES C CXX VERSION 0.0.1 DESCRIPTION "The Vivid Engine Project")
+include_directories(VividCore/inc)
+add_subdirectory(VividCore)
+add_subdirectory(VividTests)
