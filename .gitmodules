@@ -1,0 +1,9 @@
+[submodule "Vivid-Project/Libs/glfw"]
+	path = Vivid-Project/Libs/glfw
+	url = https://github.com/glfw/glfw.git
+[submodule "Vivid-Project/Libs/glm"]
+	path = Vivid-Project/Libs/glm
+	url = https://github.com/g-truc/glm.git
+[submodule "Vivid-Project/Libs/imgui"]
+	path = Vivid-Project/Libs/imgui
+	url = https://github.com/ocornut/imgui.git

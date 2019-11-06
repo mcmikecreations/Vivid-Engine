@@ -1,7 +1,7 @@
 #include "vivid_core/utility/engine_info.h"
 #include <sstream>
 
-using namespace VividCore::Utility;
+using namespace vivid_core::utility;
 
 #define FILL_VERSION(major,minor,patch) \
 int engine_info::GetMajor() const { return major; } \

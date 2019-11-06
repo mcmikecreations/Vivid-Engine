@@ -2,9 +2,9 @@
 
 #include <sstream>
 
-namespace VividCore
+namespace vivid_core
 {
-	namespace Utility
+	namespace utility
 	{
 		class engine_info
 		{

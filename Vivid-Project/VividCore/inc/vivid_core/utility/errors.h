@@ -1,8 +1,8 @@
 #pragma once
 
-namespace VividCore
+namespace vivid_core
 {
-	namespace Utility
+	namespace utility
 	{
 		enum class Errors : int
 		{

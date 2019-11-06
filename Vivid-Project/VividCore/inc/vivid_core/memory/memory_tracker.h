@@ -1,6 +1,5 @@
 #pragma once
 
-#include "vividcore_export.h"
 #include "vivid_core/utility/errors.h"
 #include <iostream>
 #include <unordered_map>
@@ -9,11 +8,11 @@
 //replaces new with malloc
 //#include <cstdlib>
 
-namespace VividCore
+namespace vivid_core
 {
-	namespace Memory
+	namespace memory
 	{
-		class VIVIDCORE_EXPORT memory_tracker
+		class memory_tracker
 		{
 		private:
 			struct memory_tracker_item
@@ -23,22 +22,22 @@ namespace VividCore
 				std::size_t count;
 			};
 			std::unordered_map<void*, memory_tracker_item> _allocated;
+			std::size_t _count_alloc, _count_free;
 		public:
 			memory_tracker();
 			virtual ~memory_tracker();
-
 			static memory_tracker * get_instance();
 
 			template <typename T, typename ...Ts>
 			T * allocate(Ts... args) noexcept
 			{
-				T *res = new (std::nothrow) T(args...);
-				//void *res_raw = malloc(sizeof(T));
-				//T *res = new (res_raw) T(args...);
+				//T *res = new (std::nothrow) T(args...);
+				void *res_raw = std::malloc(sizeof(T));
 				if (!res || res == nullptr)
 				{
 					return nullptr;
 				}
+				T *res = new (res_raw) T(args...);
 				_allocated[res] = { typeid(T).name(), sizeof(T), 0 };
 				return res;
 			}
@@ -46,9 +45,9 @@ namespace VividCore
 			template <typename T>
 			T * allocate_array(std::size_t count) noexcept
 			{
-				T *res = new (std::nothrow) T[count];
-				//void *res_raw = malloc(sizeof(T) * count);
-				//T *res = (T *)res_raw;
+				//T *res = new (std::nothrow) T[count];
+				void *res_raw = std::malloc(sizeof(T) * count);
+				T *res = (T *)res_raw;
 				if (!res || res == nullptr)
 				{
 					return nullptr;
@@ -71,10 +70,13 @@ namespace VividCore
 				}
 				std::size_t cnt = value_iter->second.count;
 				_allocated.erase(value_iter);
-				if (cnt == 0)
-					noexcept(delete value);
-				else
-					noexcept(delete[] value);
+				std::free(value);
+				//if (cnt == 0)
+				//{
+				//	noexcept(delete value);
+				//}else{
+				//	noexcept(delete[] value);
+				//}
 
 				return (int)VividCore::Utility::Errors::NONE;
 			}
@@ -82,6 +84,9 @@ namespace VividCore
 			void dump(std::ostream &);
 			std::size_t size() const;
 			bool empty() const;
+
+			std::size_t get_count_alloc() const;
+			std::size_t get_count_free() const;
 		};
 	}
 }

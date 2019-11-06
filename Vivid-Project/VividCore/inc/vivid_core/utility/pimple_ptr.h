@@ -2,15 +2,15 @@
 
 #include "vividcore_export.h"
 
-namespace VividCore
+namespace vivid_core
 {
-	namespace Utility
+	namespace utility
 	{
 		template <typename T>
-		class VIVIDCORE_EXPORT PimplePtr {
+		class pimple_ptr {
 			T * p;
 		public:
-			explicit PimplePtr(T * t) : p(t) {}
+			explicit pimple_ptr(T * t) : p(t) {}
 
 			const T & operator*() const { return *p; }
 			T & operator*() { return *p; }
