@@ -12,6 +12,7 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/Libs/modules")
 set(GLM_ROOT_DIR "Libs/glm")
 find_package(GLM REQUIRED)
+find_package(Vulkan REQUIRED)
 
 include_directories(VividCore/inc)
 add_subdirectory(Libs/glfw)
