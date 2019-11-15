@@ -1,0 +1,11 @@
+/*! @namespace vivid_core
+@brief Namespace for the engine.
+*/
+
+/*! @namespace vivid_core::utility
+@brief Utility functionality used across the engine.
+*/
+
+/*! @namespace vivid_core::memory
+@brief Memory management and tracking.
+*/

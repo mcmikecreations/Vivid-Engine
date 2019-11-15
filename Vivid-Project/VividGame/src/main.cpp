@@ -8,6 +8,8 @@
 
 #include <iostream>
 
+#include "vivid_core/app/application.h"
+
 int main() {
 	glfwInit();
 
