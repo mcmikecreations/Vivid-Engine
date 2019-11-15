@@ -11,7 +11,7 @@ public:
 
 TEST_CASE("Memory tracker works", "[memory]") {
 	SECTION("Check standard type creation") {
-		VividCore::Memory::memory_tracker m;
+		vivid_core::memory::memory_tracker m;
 		REQUIRE(m.size() == 0);
 		REQUIRE(m.empty());
 
@@ -26,7 +26,7 @@ TEST_CASE("Memory tracker works", "[memory]") {
 		REQUIRE(m.empty());
 	}
 	SECTION("Check custom class creation") {
-		VividCore::Memory::memory_tracker m;
+		vivid_core::memory::memory_tracker m;
 		REQUIRE(m.size() == 0);
 		REQUIRE(m.empty());
 
@@ -41,7 +41,7 @@ TEST_CASE("Memory tracker works", "[memory]") {
 		REQUIRE(m.empty());
 	}
 	SECTION("Check type array") {
-		VividCore::Memory::memory_tracker m;
+		vivid_core::memory::memory_tracker m;
 		REQUIRE(m.size() == 0);
 		REQUIRE(m.empty());
 
@@ -56,7 +56,7 @@ TEST_CASE("Memory tracker works", "[memory]") {
 		REQUIRE(m.empty());
 	}
 	SECTION("Check multiple creates") {
-		VividCore::Memory::memory_tracker m;
+		vivid_core::memory::memory_tracker m;
 		REQUIRE(m.size() == 0);
 		REQUIRE(m.empty());
 
@@ -81,7 +81,7 @@ TEST_CASE("Memory tracker works", "[memory]") {
 		REQUIRE(m.empty());
 	}
 	SECTION("Check error") {
-		VividCore::Memory::memory_tracker m;
+		vivid_core::memory::memory_tracker m;
 		REQUIRE(m.size() == 0);
 		REQUIRE(m.empty());
 
@@ -97,8 +97,8 @@ TEST_CASE("Memory tracker works", "[memory]") {
 		REQUIRE_FALSE(m.empty());
 		REQUIRE(myP != nullptr);
 
-		REQUIRE(m.free<int>(nullptr) == (int)VividCore::Utility::Errors::MEMORY_CORRUPT);
-		REQUIRE(m.free(myIntArray + 1) == (int)VividCore::Utility::Errors::OBJECT_NOT_FOUND);
+		REQUIRE(m.free<int>(nullptr) == (int)vivid_core::utility::errors::MEMORY_CORRUPT);
+		REQUIRE(m.free(myIntArray + 1) == (int)vivid_core::utility::errors::OBJECT_NOT_FOUND);
 
 		m.free(myIntArray);
 		REQUIRE(m.size() == 1);

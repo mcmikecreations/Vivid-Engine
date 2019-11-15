@@ -4,7 +4,7 @@ using namespace vivid_core::memory;
 
 static memory_tracker * tracker = nullptr;
 
-memory_tracker::memory_tracker() : _count_alloc(0), _count_free(0)
+memory_tracker::memory_tracker() : _count_alloc_objects(0), _count_free_objects(0), _count_alloc_bytes(0), _count_free_bytes(0)
 {
 }
 
@@ -28,7 +28,7 @@ memory_tracker * memory_tracker::get_instance()
 
 void memory_tracker::dump(std::ostream &stream)
 {
-	stream << "alloc: " << _count_alloc << " free: " << _count_free << std::endl;
+	stream << "alloc: " << _count_alloc_bytes << " free: " << _count_free_bytes << std::endl;
 	if (_allocated.empty()) return;
 	for (auto& it : _allocated) {
 		stream << it.first << " " << it.second.name << "(" << it.second.size << ")";
@@ -50,12 +50,22 @@ bool memory_tracker::empty() const
 	return _allocated.empty();
 }
 
-std::size_t memory_tracker::get_count_alloc() const
+std::size_t memory_tracker::get_count_alloc_objects() const
 {
-	return _count_alloc;
+	return _count_alloc_objects;
 }
 
-std::size_t memory_tracker::get_count_free() const
+std::size_t memory_tracker::get_count_free_objects() const
 {
-	return _count_free;
+	return _count_free_objects;
+}
+
+std::size_t memory_tracker::get_count_alloc_bytes() const
+{
+	return _count_alloc_bytes;
+}
+
+std::size_t memory_tracker::get_count_free_bytes() const
+{
+	return _count_free_bytes;
 }

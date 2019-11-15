@@ -4,7 +4,7 @@ namespace vivid_core
 {
 	namespace utility
 	{
-		enum class Errors : int
+		enum class errors : int
 		{
 			NONE = 0,
 			MEMORY_CORRUPT,

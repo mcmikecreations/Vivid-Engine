@@ -4,7 +4,7 @@ file(GLOB_RECURSE INP_FILES inc_private/*.h)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
-add_library(VividCore ${SRC_FILES}) # ${INC_FILES} ${INP_FILES}
+add_library(VividCore ${SRC_FILES}) # ${INC_FILES} ${INP_FILES} 
 set_target_properties(VividCore PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(VividCore PUBLIC inc)
 target_include_directories(VividCore PRIVATE inc_private)
