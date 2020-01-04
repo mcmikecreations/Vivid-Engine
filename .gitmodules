@@ -7,3 +7,9 @@
 [submodule "Vivid-Project/Libs/imgui"]
 	path = Vivid-Project/Libs/imgui
 	url = https://github.com/ocornut/imgui.git
+[submodule "Vivid-Project/Libs/spdlog"]
+	path = Vivid-Project/Libs/spdlog
+	url = https://github.com/gabime/spdlog.git
+[submodule "Vivid-Project/Libs/di"]
+	path = Vivid-Project/Libs/di
+	url = https://github.com/boost-experimental/di.git
