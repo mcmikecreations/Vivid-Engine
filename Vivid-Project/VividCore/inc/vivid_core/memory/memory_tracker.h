@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vivid_core/utility/errors.h"
+#include "vivid_core/utility/error.h"
 #include <iostream>
 #include <unordered_map>
 #include <utility>
@@ -67,12 +67,12 @@ namespace vivid_core
 			{
 				if (!value || value == nullptr)
 				{
-					return (int)vivid_core::utility::errors::MEMORY_CORRUPT;
+					return (int)vivid_core::utility::error::MEMORY_CORRUPT;
 				}
 				auto value_iter = _allocated.find(value);
 				if (value_iter == _allocated.end())
 				{
-					return (int)vivid_core::utility::errors::OBJECT_NOT_FOUND;
+					return (int)vivid_core::utility::error::OBJECT_NOT_FOUND;
 				}
 				_allocated.erase(value_iter);
 				if constexpr (std::is_nothrow_destructible<T>::value)
@@ -83,7 +83,7 @@ namespace vivid_core
 				_count_free_bytes += sizeof(T);
 				std::free(value);
 				//noexcept(delete value);
-				return (int)vivid_core::utility::errors::NONE;
+				return (int)vivid_core::utility::error::SUCCESS;
 			}
 
 			template <typename T>
@@ -91,19 +91,19 @@ namespace vivid_core
 			{
 				if (!value || value == nullptr)
 				{
-					return (int)vivid_core::utility::errors::MEMORY_CORRUPT;
+					return (int)vivid_core::utility::error::MEMORY_CORRUPT;
 				}
 				auto value_iter = _allocated.find(value);
 				if (value_iter == _allocated.end())
 				{
-					return (int)vivid_core::utility::errors::OBJECT_NOT_FOUND;
+					return (int)vivid_core::utility::error::OBJECT_NOT_FOUND;
 				}
 				++_count_free_objects;
 				_count_free_bytes += sizeof(T) * value_iter->second.count;
 				_allocated.erase(value_iter);
 				std::free(value);
 				//noexcept(delete[] value);
-				return (int)vivid_core::utility::errors::NONE;
+				return (int)vivid_core::utility::error::SUCCESS;
 			}
 
 			void dump(std::ostream &);

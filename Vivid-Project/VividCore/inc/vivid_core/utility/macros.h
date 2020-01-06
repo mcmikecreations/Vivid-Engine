@@ -11,3 +11,9 @@
 #define VE_DEL(ptr) noexcept(delete ptr)
 #define VE_DELARR(ptr) noexcept(delete[] ptr)
 #endif
+
+#define START_NAME(val) namespace val {
+#define END_NAME(val) } //val
+
+#define START_ENGINE START_NAME(vivid_core)
+#define END_ENGINE END_NAME(vivid_core)

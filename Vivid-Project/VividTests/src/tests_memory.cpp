@@ -97,8 +97,8 @@ TEST_CASE("Memory tracker works", "[memory]") {
 		REQUIRE_FALSE(m.empty());
 		REQUIRE(myP != nullptr);
 
-		REQUIRE(m.free<int>(nullptr) == (int)vivid_core::utility::errors::MEMORY_CORRUPT);
-		REQUIRE(m.free(myIntArray + 1) == (int)vivid_core::utility::errors::OBJECT_NOT_FOUND);
+		REQUIRE(m.free<int>(nullptr) == (int)vivid_core::utility::error::MEMORY_CORRUPT);
+		REQUIRE(m.free(myIntArray + 1) == (int)vivid_core::utility::error::OBJECT_NOT_FOUND);
 
 		m.free(myIntArray);
 		REQUIRE(m.size() == 1);

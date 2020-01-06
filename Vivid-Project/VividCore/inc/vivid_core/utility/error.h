@@ -10,12 +10,16 @@ namespace vivid_core
 		/*!
 		@brief An enumeration of all errors, that can be returned by the engine.
 		*/
-		enum class errors : int
+		enum class error : int
 		{
 			/*!
-			No error.
+			Operation was successful.
 			*/
-			NONE = 0,
+			SUCCESS = 0,
+			/*!
+			Operation failed.
+			*/
+			FAILURE = 0,
 			/*!
 			Memory, used by the engine, was corrupted.
 			*/
