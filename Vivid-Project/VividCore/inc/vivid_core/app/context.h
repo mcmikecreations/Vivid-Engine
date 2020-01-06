@@ -9,17 +9,11 @@ START_NAME(app)
 class context
 {
 public:
-	context(context_controllers::context_controller&);
+	context(context_controllers::context_controller& controller);
 	~context();
 
-	int init()
-	{
-		return _controller.init();
-	}
-	int term()
-	{
-		return _controller.term();
-	}
+	int init();
+	int term();
 private:
 	context_controllers::context_controller& _controller;
 };

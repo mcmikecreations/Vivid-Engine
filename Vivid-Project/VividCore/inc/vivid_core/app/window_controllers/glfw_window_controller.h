@@ -13,6 +13,7 @@ class glfw_window_controller : public window_controller
 public:
 	int init(int width, int height, const char* title) override;
 	int term() override;
+	void* expose_handle() override;
 private:
 	int _width, _height;
 	GLFWwindow* _window;

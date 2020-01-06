@@ -17,98 +17,103 @@ using namespace vivid_core::utility;
 int application::run()
 {
 	init();
-	mainLoop();
+	main_loop();
 	term();
-	auto &a = dependencies::get_instance();
 	return (int)error::SUCCESS;
 }
 
 int application::init()
 {
 	int res = (int)error::SUCCESS;
-	res = initLogger();
+	res = init_logger();
 	if (res != (int)error::SUCCESS)
 	{
-		termLogger();
+		term_logger();
 		return res;
 	}
-	res = initContext();
+	res = init_context();
 	if (res != (int)error::SUCCESS)
 	{
-		termContext();
-		termLogger();
+		term_context();
+		term_logger();
 		return res;
 	}
-	res = initWindow();
+	res = init_window();
 	if (res != (int)error::SUCCESS)
 	{
-		termWindow();
-		termContext();
-		termLogger();
+		term_window();
+		term_context();
+		term_logger();
 		return res;
 	}
 
-	_logger->info("Init successful");
+	spdlog::info("Init successful");
 	return (int)error::SUCCESS;
 }
 
 int application::term()
 {
-	termWindow();
-	termContext();
-	termLogger();
+	term_window();
+	term_context();
+	term_logger();
 
 	return (int)error::SUCCESS;
 }
 
-int application::mainLoop()
+int application::main_loop()
 {
+	while (!glfwWindowShouldClose((GLFWwindow*)_window->expose_handle())) {
+		glfwPollEvents();
+	}
 	return (int)error::SUCCESS;
 }
 
-int application::initContext()
+int application::init_context()
 {
-
-	return (int)error::SUCCESS;
+	_context = dependencies::get_injector().create<std::shared_ptr<context>>();
+	return _context->init();
 }
 
-int application::initWindow()
+int application::init_window()
 {
-	return (int)error::SUCCESS;
+	_window = dependencies::get_injector().create<std::shared_ptr<window>>();
+	return _window->init(640, 480, "Vivid Engine");
 }
 
-int application::initLogger()
+int application::init_logger()
 {
+	//TODO - replace allocations with a custom allocator
 	auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
 	console_sink->set_level(spdlog::level::warn);
-	//console_sink->set_pattern("[multi_sink_example] [%^%l%$] %v");
 
 	auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("log.txt", true);
 	file_sink->set_level(spdlog::level::trace);
 
 	spdlog::sinks_init_list sink_list = { file_sink, console_sink };
-	//TODO - replace this new with a custom allocator
 	spdlog::logger *logger = new spdlog::logger("global log", sink_list.begin(), sink_list.end());
 	logger->set_level(spdlog::level::debug);
 
 	_logger = std::shared_ptr<spdlog::logger>(logger);
+	spdlog::set_default_logger(_logger);
 
 	return (int)error::SUCCESS;
 }
 
-int application::termLogger()
+int application::term_logger()
 {
 	spdlog::drop_all();
 	spdlog::shutdown();
 	return (int)error::SUCCESS;
 }
 
-int application::termContext()
+int application::term_context()
 {
+	int result = 0;
+	if (_context) return _context->term();
 	return (int)error::SUCCESS;
 }
 
-int application::termWindow()
+int application::term_window()
 {
 	return (int)error::SUCCESS;
 }

@@ -11,6 +11,7 @@ class window_controller
 public:
 	virtual int init(int width, int height, const char* title)=0;
 	virtual int term()=0;
+	virtual void* expose_handle()=0;
 };
 
 END_NAME(window_controllers)

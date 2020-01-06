@@ -13,22 +13,22 @@ namespace vivid_core
 		class application {
 		private:
 			std::shared_ptr<spdlog::logger> _logger;
-			context* _context;
-			window* _window;
+			std::shared_ptr<context> _context;
+			std::shared_ptr<window> _window;
 		public:
 			int run();
 		private:
 			int init();
-			int mainLoop();
+			int main_loop();
 			int term();
 
-			int initLogger();
-			int initContext();
-			int initWindow();
+			int init_logger();
+			int init_context();
+			int init_window();
 
-			int termLogger();
-			int termContext();
-			int termWindow();
+			int term_logger();
+			int term_context();
+			int term_window();
 		};
 	}
 }

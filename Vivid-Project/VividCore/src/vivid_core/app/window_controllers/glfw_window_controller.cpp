@@ -14,12 +14,17 @@ int glfw_window_controller::init(int width, int height, const char* title)
 
 	_window = glfwCreateWindow(width, height, title, nullptr, nullptr);
 
-	if (_window) return (int)vivid_core::utility::error::SUCCESS;
+	if (_window != NULL) return (int)vivid_core::utility::error::SUCCESS;
 	return (int)vivid_core::utility::error::BAD_ALLOC;
 }
 
 int glfw_window_controller::term()
 {
-	if (_window) glfwDestroyWindow(_window);
+	if (_window != NULL) glfwDestroyWindow(_window);
 	return (int)vivid_core::utility::error::SUCCESS;
+}
+
+void* glfw_window_controller::expose_handle()
+{
+	return _window;
 }

@@ -7,7 +7,7 @@ START_ENGINE
 START_NAME(app)
 START_NAME(context_controllers)
 
-class glfw_context_controller : context_controller
+class glfw_context_controller : public context_controller
 {
 public:
 	int init() override;
