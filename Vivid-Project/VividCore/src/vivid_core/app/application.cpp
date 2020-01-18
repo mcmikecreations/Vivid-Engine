@@ -76,7 +76,7 @@ int application::init_context()
 
 int application::init_window()
 {
-	_window = dependencies::get_injector().create<std::shared_ptr<window>>();
+	_window.reset(ui::window::create());
 	return _window->init(640, 480, "Vivid Engine");
 }
 

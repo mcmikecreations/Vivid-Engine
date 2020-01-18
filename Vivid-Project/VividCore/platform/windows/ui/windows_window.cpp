@@ -1,10 +1,10 @@
 #include <GLFW/glfw3.h>
 #include "vivid_core/utility/error.h"
-#include "vivid_core/app/window_controllers/glfw_window_controller.h"
+#include "ui/windows_window.h"
 
-using namespace vivid_core::app::window_controllers;
+using namespace vivid_core::ui;
 
-int glfw_window_controller::init(int width, int height, const char* title)
+int windows_window::init(int width, int height, const char* title)
 {
 	_width = width;
 	_height = height;
@@ -18,13 +18,13 @@ int glfw_window_controller::init(int width, int height, const char* title)
 	return (int)vivid_core::utility::error::BAD_ALLOC;
 }
 
-int glfw_window_controller::term()
+int windows_window::term()
 {
 	if (_window != NULL) glfwDestroyWindow(_window);
 	return (int)vivid_core::utility::error::SUCCESS;
 }
 
-void* glfw_window_controller::expose_handle()
+void* windows_window::expose_handle()
 {
 	return _window;
 }
