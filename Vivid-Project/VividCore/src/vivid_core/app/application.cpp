@@ -77,7 +77,7 @@ int application::init_context()
 int application::init_window()
 {
 	_window.reset(ui::window::create());
-	return _window->init(640, 480, "Vivid Engine");
+	return _window->init(ui::window_props());
 }
 
 int application::init_logger()
