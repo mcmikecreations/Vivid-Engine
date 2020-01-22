@@ -1,17 +1,16 @@
 #include <GLFW/glfw3.h>
 #include "vivid_core/utility/error.h"
-#include "vivid_core/app/context_controllers/glfw_context_controller.h"
-#include <iostream>
+#include "ui/windows_ui_context.h"
 
-using namespace vivid_core::app::context_controllers;
+using namespace vivid_core::ui;
 
-int glfw_context_controller::init()
+int windows_ui_context::init()
 {
 	if (glfwInit() == GLFW_TRUE) return (int)vivid_core::utility::error::SUCCESS;
 	return (int)vivid_core::utility::error::FAILURE;
 }
 
-int glfw_context_controller::term()
+int windows_ui_context::term()
 {
 	glfwTerminate();
 	return (int)vivid_core::utility::error::SUCCESS;

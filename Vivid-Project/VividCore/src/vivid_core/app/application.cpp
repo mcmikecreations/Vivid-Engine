@@ -70,7 +70,7 @@ int application::main_loop()
 
 int application::init_context()
 {
-	_context = dependencies::get_injector().create<std::shared_ptr<context>>();
+	_context.reset(ui::ui_context::create());
 	return _context->init();
 }
 
@@ -108,7 +108,6 @@ int application::term_logger()
 
 int application::term_context()
 {
-	int result = 0;
 	if (_context) return _context->term();
 	return (int)error::SUCCESS;
 }

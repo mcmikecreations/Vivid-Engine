@@ -16,8 +16,8 @@ public:
 	virtual int term() override;
 	virtual void* expose_handle() override;
 private:
-	int _width, _height;
 	GLFWwindow* _window;
+	int _width, _height;
 };
 
 END_NAME(ui)

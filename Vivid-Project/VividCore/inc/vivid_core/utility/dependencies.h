@@ -3,9 +3,6 @@
 #include "vivid_core/utility/macros.h"
 #include <boost/di.hpp>
 
-#include "vivid_core/app/context_controllers/context_controller.h"
-#include "vivid_core/app/context_controllers/glfw_context_controller.h"
-
 START_ENGINE
 START_NAME(utility)
 
@@ -21,8 +18,8 @@ public:
 	static auto& get_injector() noexcept
 	{
 		const auto injector = boost::di::make_injector(
-			boost::di::bind<app::context_controllers::context_controller>
-			.to<app::context_controllers::glfw_context_controller>()
+			//boost::di::bind<app::context_controllers::context_controller>
+			//.to<app::context_controllers::glfw_context_controller>()
 		);
 		return injector;
 	}

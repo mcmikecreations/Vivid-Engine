@@ -3,7 +3,7 @@
 #include <memory>
 #include "spdlog/spdlog.h"
 
-#include "vivid_core/app/context.h"
+#include "vivid_core/ui/ui_context.h"
 #include "vivid_core/ui/window.h"
 
 namespace vivid_core
@@ -13,7 +13,7 @@ namespace vivid_core
 		class application {
 		private:
 			std::shared_ptr<spdlog::logger> _logger;
-			std::shared_ptr<context> _context;
+			std::shared_ptr<ui::ui_context> _context;
 			std::shared_ptr<ui::window> _window;
 		public:
 			int run();

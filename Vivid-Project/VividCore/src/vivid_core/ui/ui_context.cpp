@@ -1,13 +1,13 @@
-#include "vivid_core/ui/window.h"
+#include "vivid_core/ui/ui_context.h"
 #include "vivid_core/ui/ui_api.h"
 
 #ifdef VV_GLFW
-#include "ui/windows_window.h"
+#include "ui/windows_ui_context.h"
 #endif
 
 using namespace vivid_core::ui;
 
-window* window::create()
+ui_context* ui_context::create()
 {
 	auto api = ui_api_wrapper::get_api();
 	switch (api)
@@ -17,7 +17,7 @@ window* window::create()
 		return nullptr;
 #ifdef VV_GLFW
 	case vivid_core::ui::ui_api::GLFW:
-		return new windows_window();
+		return new windows_ui_context();
 #endif
 	default:
 		VV_CORE_ASSERT(false, "No ui api specified.");
