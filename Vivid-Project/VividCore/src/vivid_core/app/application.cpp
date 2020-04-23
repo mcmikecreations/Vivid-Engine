@@ -62,6 +62,7 @@ int application::term()
 
 int application::main_loop()
 {
+	//TODO - put this into an event handler
 	while (!glfwWindowShouldClose((GLFWwindow*)_window->expose_handle())) {
 		glfwPollEvents();
 	}
