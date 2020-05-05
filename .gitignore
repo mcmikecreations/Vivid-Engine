@@ -1,4 +1,8 @@
 Vivid-Project/out/
+Vivid-Docs/_build/
+Vivid-Docs/_static/
+Vivid-Docs/_templates/
+Vivid-Docs/api/
 
 # ----- C++ -----
 # Prerequisites

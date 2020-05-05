@@ -18,7 +18,7 @@ if(ApiChain STREQUAL "glfw_vulkan")
 	list(APPEND API_CHAIN_DEFINES VV_GLFW)
 	list(APPEND API_CHAIN_DEFINES VV_VULKAN)
 endif()
-message("Api chain defines were set to " "${API_CHAIN_DEFINES}")
+message(STATUS "Api chain defines were set to " "${API_CHAIN_DEFINES}")
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
