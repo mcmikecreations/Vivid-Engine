@@ -1,0 +1,723 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>VUL IoC &mdash; Vivid Engine  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="prev" title="RAII" href="../patterns/raii.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Vivid Engine
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../vul.html">VUL docs</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../patterns/patterns.html">VUL Patterns</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">VUL IoC</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api">API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scope-api">Scope API</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Vivid Engine</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../vul.html">VUL Docs Home</a> &raquo;</li>
+        
+      <li>VUL IoC</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/vul/ioc/ioc.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="vul-ioc">
+<h1>VUL IoC<a class="headerlink" href="#vul-ioc" title="Permalink to this headline">¶</a></h1>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#usage" id="id1">Usage</a></p></li>
+<li><p><a class="reference internal" href="#api" id="id2">API</a></p></li>
+<li><p><a class="reference internal" href="#scope-api" id="id3">Scope API</a></p></li>
+</ul>
+</div>
+<p>IoC principle is realized in this library as an IoC Container.</p>
+<ul class="simple">
+<li><p>Is non-intrusive (does not use preprocessor directives / special types).</p></li>
+<li><p>Exception-less (can be compiled with <code class="code docutils literal notranslate"><span class="pre">-fno-exceptions</span></code>).</p></li>
+<li><p>Lightweight (around 12 bytes for each object apart from the object itself).</p></li>
+<li><p>Supports both transient and singleton lifetime.</p></li>
+<li><p>Has built-in memory management.</p></li>
+<li><p>Uses C++20 features.</p></li>
+</ul>
+<div class="section" id="usage">
+<h2><a class="toc-backref" href="#id1">Usage</a><a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>Let’s assume we have the classes, listed below.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Repo</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span> <span class="k">virtual</span> <span class="kt">int</span> <span class="n">get</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">class</span> <span class="nc">const_repo</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Repo</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span> <span class="k">virtual</span> <span class="kt">int</span> <span class="n">get</span><span class="p">()</span> <span class="k">override</span> <span class="p">{</span> <span class="k">return</span> <span class="mi">5</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="k">class</span> <span class="nc">Logger</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span> <span class="k">virtual</span> <span class="kt">void</span> <span class="n">log</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">class</span> <span class="nc">cout_logger</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Logger</span>
+<span class="p">{</span>
+    <span class="n">Repo</span><span class="o">*</span> <span class="n">_repo</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">cout_logger</span><span class="p">(</span><span class="n">Repo</span><span class="o">*</span> <span class="n">repo</span><span class="p">)</span> <span class="o">:</span> <span class="n">_repo</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span> <span class="p">{}</span>
+    <span class="k">virtual</span> <span class="kt">void</span> <span class="n">log</span><span class="p">()</span> <span class="k">override</span> <span class="p">{</span> <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">_repo</span><span class="o">-&gt;</span><span class="n">get</span><span class="p">();</span> <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>This is a standard Repository-Service pattern, a piece of the Onion
+Architecture. A repository accesses data (in our case a const value) and a
+service uses a repository to process the accessed data. In our case a logger
+class logs an int from the repo class. Now the IoC Container usage.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">example</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="n">di</span> <span class="n">d</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">d</span><span class="p">.</span><span class="n">add_transient</span><span class="o">&lt;</span><span class="n">Repo</span><span class="p">,</span> <span class="n">const_repo</span><span class="o">&gt;</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">d</span><span class="p">.</span><span class="n">add_singleton</span><span class="o">&lt;</span><span class="n">Logger</span><span class="p">,</span> <span class="n">cout_logger</span><span class="p">,</span> <span class="n">Repo</span><span class="o">&gt;</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+    <span class="n">d</span><span class="p">.</span><span class="n">init</span><span class="p">();</span>
+    <span class="k">auto</span> <span class="n">logger</span> <span class="o">=</span> <span class="n">d</span><span class="p">.</span><span class="n">get</span><span class="o">&lt;</span><span class="n">Logger</span><span class="o">&gt;</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">get</span><span class="p">();</span>
+    <span class="n">logger</span><span class="o">-&gt;</span><span class="n">log</span><span class="p">();</span> <span class="c1">//We get &quot;5&quot; in console</span>
+    <span class="n">d</span><span class="p">.</span><span class="n">term</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="admonition danger">
+<p class="admonition-title">Danger</p>
+<p>Do not call <code class="code docutils literal notranslate"><span class="pre">init()</span></code> or <code class="code docutils literal notranslate"><span class="pre">term()</span></code> more than once for one instance
+of di. This leads to undefined behavior.</p>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>This class does not terminate on destruction, you have to call <code class="code docutils literal notranslate"><span class="pre">term()</span></code>
+manually.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This class does not use any special thread safety mechanisms.</p>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>It is safe to call <code class="code docutils literal notranslate"><span class="pre">di::free(ptr)</span></code> in a destructor, if you are sure
+that the pointed value isn’t used anywhere else. In case of an expected error
+you’ll get a 0 as a return.</p>
+</div>
+</div>
+<div class="section" id="api">
+<h2><a class="toc-backref" href="#id2">API</a><a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h2>
+<dl class="cpp class">
+<dt id="_CPPv4N3vul3ioc2diE">
+<span id="_CPPv3N3vul3ioc2diE"></span><span id="_CPPv2N3vul3ioc2diE"></span><span id="vul::ioc::di"></span><span class="target" id="classvul_1_1ioc_1_1di"></span><em class="property">class </em><code class="sig-prename descclassname">vul::ioc<code class="sig-prename descclassname">::</code></code><code class="sig-name descname">di</code><a class="headerlink" href="#_CPPv4N3vul3ioc2diE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>An IoC Container. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Functions</p>
+<dl class="cpp function">
+<dt id="_CPPv4N3vul3ioc2di2diEPNSt3pmr15memory_resourceE">
+<span id="_CPPv3N3vul3ioc2di2diEPNSt3pmr15memory_resourceE"></span><span id="_CPPv2N3vul3ioc2di2diEPNSt3pmr15memory_resourceE"></span><span id="vul::ioc::di::di__std::pmr::memory_resourceP"></span><span class="target" id="classvul_1_1ioc_1_1di_1a7e7e3abb25014a2bcd8a6e69b2126d70"></span><code class="sig-name descname">di</code><span class="sig-paren">(</span>std::pmr::memory_resource *<em>resource</em> = std::pmr::get_default_resource()<span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul3ioc2di2diEPNSt3pmr15memory_resourceE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct an IoC Container using a prepared memory_resource.</p>
+<p><dl class="simple">
+<dt><strong>Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">[in]</span> <span class="pre">resource</span></code>: Memory resource, that will be used for all internal allocations. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3vul3ioc2di4initEv">
+<span id="_CPPv3N3vul3ioc2di4initEv"></span><span id="_CPPv2N3vul3ioc2di4initEv"></span><span id="vul::ioc::di::init"></span><span class="target" id="classvul_1_1ioc_1_1di_1a81fe599c532e1cff716b29bdf3635fec"></span>int <code class="sig-name descname">init</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul3ioc2di4initEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Initialize the IoC Container.</p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>1 if succeeded, 0 otherwise. </p>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3vul3ioc2di4termEv">
+<span id="_CPPv3N3vul3ioc2di4termEv"></span><span id="_CPPv2N3vul3ioc2di4termEv"></span><span id="vul::ioc::di::term"></span><span class="target" id="classvul_1_1ioc_1_1di_1a7b3948e8902e610837c1a6a95d5356cd"></span>int <code class="sig-name descname">term</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul3ioc2di4termEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Call termination routine of the IoC Container, clear scope and mapping cache.</p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>1 if succeeded, 0 otherwise. </p>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3vul3ioc2di4freeEP14di_basic_scopeb">
+<span id="_CPPv3N3vul3ioc2di4freeEP14di_basic_scopeb"></span><span id="_CPPv2N3vul3ioc2di4freeEP14di_basic_scopeb"></span><span id="vul::ioc::di::free__di_basic_scopeP.b"></span><span class="target" id="classvul_1_1ioc_1_1di_1a13e1f81c52b9e6e9ba009831b30d9f0a"></span>int <code class="sig-name descname">free</code><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4N3vul3ioc14di_basic_scopeE" title="vul::ioc::di_basic_scope">di_basic_scope</a> *<em>scope</em>, bool <em>immediate</em> = true<span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul3ioc2di4freeEP14di_basic_scopeb" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Manually free the scope from the IoC Container cache.</p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>1 if succeeded, 0 otherwise. </p>
+</dd>
+<dt><strong>Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">[in]</span> <span class="pre">scope</span></code>: The scope to free from cache. </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[in]</span> <span class="pre">immediate</span></code>: Whether to free the value immediately or scedule it for the next cache clear routine. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3vul3ioc2di4freeEPvb">
+<span id="_CPPv3N3vul3ioc2di4freeEPvb"></span><span id="_CPPv2N3vul3ioc2di4freeEPvb"></span><span id="vul::ioc::di::free__voidP.b"></span><span class="target" id="classvul_1_1ioc_1_1di_1a8db35173d4a60430afc57baf8618911b"></span>int <code class="sig-name descname">free</code><span class="sig-paren">(</span>void *<em>value</em>, bool <em>immediate</em> = true<span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul3ioc2di4freeEPvb" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Manually free the value from the IoC Container cache.</p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>1 if succeeded, 0 otherwise. </p>
+</dd>
+<dt><strong>Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">[in]</span> <span class="pre">value</span></code>: The value to free from cache. </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[in]</span> <span class="pre">immediate</span></code>: Whether to free the value immediately or scedule it for the next cache clear routine. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3vul3ioc2di5clearEv">
+<span id="_CPPv3N3vul3ioc2di5clearEv"></span><span id="_CPPv2N3vul3ioc2di5clearEv"></span><span id="vul::ioc::di::clear"></span><span class="target" id="classvul_1_1ioc_1_1di_1a9ac744fde3cc05ec4c28979b301bc778"></span>int <code class="sig-name descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul3ioc2di5clearEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Clears scope cache of the IoC Container, leaves mapping cache intact.</p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>1 if succeeded, 0 otherwise. </p>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4I0EN3vul3ioc2di3getEP8di_scopeI2_TEv">
+<span id="_CPPv3I0EN3vul3ioc2di3getEv"></span><span id="_CPPv2I0EN3vul3ioc2di3getEv"></span>template&lt;class <code class="sig-name descname">_T</code>&gt;<br /><span class="target" id="classvul_1_1ioc_1_1di_1a1469d156de950f3c45d54454cebcdf06"></span><a class="reference internal" href="#_CPPv4I0EN3vul3ioc8di_scopeE" title="vul::ioc::di_scope">di_scope</a>&lt;<a class="reference internal" href="#_CPPv4I0EN3vul3ioc2di3getEP8di_scopeI2_TEv" title="vul::ioc::di::get::_T">_T</a>&gt; *<code class="sig-name descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4I0EN3vul3ioc2di3getEP8di_scopeI2_TEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Get a value, wrapped in a scope, from the IoC Container.</p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>Scope from the IoC Container if succeeded, nullptr otherwise. </p>
+</dd>
+<dt><strong>Template Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">_T</span></code>: The type of value (interface) to get, no pointer or reference needed. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4I0DpEN3vul3ioc2di9constructEP2_Tv">
+<span id="_CPPv3I0DpEN3vul3ioc2di9constructEv"></span><span id="_CPPv2I0DpEN3vul3ioc2di9constructEv"></span>template&lt;class <code class="sig-name descname">_T</code>, class ...<code class="sig-name descname">Args</code>&gt;<br /><span class="target" id="classvul_1_1ioc_1_1di_1a227670e6641822d6d2b24e6fc1bc33c0"></span><a class="reference internal" href="#_CPPv4I0DpEN3vul3ioc2di9constructEP2_Tv" title="vul::ioc::di::construct::_T">_T</a> *<code class="sig-name descname">construct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4I0DpEN3vul3ioc2di9constructEP2_Tv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct a class using the values, provided by the IoC Container.</p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>The constructed object if succeeded, nullptr otherwise. </p>
+</dd>
+<dt><strong>Template Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">_T</span></code>: The type of object to construct. </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Args</span></code>: The arguments, that will be passed to the constructor of _T, no pointer or reference needed. All of the arguments inside the constructor have to be pointers. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4I0EN3vul3ioc2di8destructEvP2_T">
+<span id="_CPPv3I0EN3vul3ioc2di8destructEP2_T"></span><span id="_CPPv2I0EN3vul3ioc2di8destructEP2_T"></span>template&lt;class <code class="sig-name descname">_T</code>&gt;<br /><span class="target" id="classvul_1_1ioc_1_1di_1a76a113e612c25ea42ae77039a50b2ef2"></span>void <code class="sig-name descname">destruct</code><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0EN3vul3ioc2di8destructEvP2_T" title="vul::ioc::di::destruct::_T">_T</a> *<em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4I0EN3vul3ioc2di8destructEvP2_T" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Destroy an object, constructed by the IoC Container. </p>
+<p>Does not destroy or free the scopes, that were passed as constructor parameters. It is upon the user to check if the object was constructed by the IoC Container instance.</p>
+<p><dl class="simple">
+<dt><strong>Template Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">_T</span></code>: The type of object to destroy. </p></li>
+</ul>
+</dd>
+<dt><strong>Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">[in]</span> <span class="pre">value</span></code>: The object to destroy. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3vul3ioc2di13get_allocatorEv">
+<span id="_CPPv3N3vul3ioc2di13get_allocatorEv"></span><span id="_CPPv2N3vul3ioc2di13get_allocatorEv"></span><span id="vul::ioc::di::get_allocator"></span><span class="target" id="classvul_1_1ioc_1_1di_1a9c3551945fd45a6121e2e1e576b851c6"></span>allocator_type&lt;std::byte&gt; &amp;<code class="sig-name descname">get_allocator</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul3ioc2di13get_allocatorEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Get the internal allocator, used by the IoC Container. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4I00DpEN3vul3ioc2di13add_transientEiv">
+<span id="_CPPv3I00DpEN3vul3ioc2di13add_transientEv"></span><span id="_CPPv2I00DpEN3vul3ioc2di13add_transientEv"></span>template&lt;class <code class="sig-name descname">_InT</code>, class <code class="sig-name descname">_ImV</code>, class ...<code class="sig-name descname">Args</code>&gt;<br /><span class="target" id="classvul_1_1ioc_1_1di_1afcf92855ff066e1a04c22f0ef6d0fb6a"></span>int <code class="sig-name descname">add_transient</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4I00DpEN3vul3ioc2di13add_transientEiv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Add an interface and implementation to the transient mapping cache. </p>
+<p>Add a transient factory method to create objects of type _ImV, when requested using the interface of type _InT. On every subsequent call of <code class="docutils literal notranslate"><span class="pre">get&lt;_InT&gt;()</span></code> a new instance of _ImV will be constructed.</p>
+<p><dl class="simple">
+<dt><strong>Template Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">_InT</span></code>: The interface to use for mapping. Use this type to get instances in the future. </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">_ImV</span></code>: The implementation to use for mapping. Objects of this type are constructed, when calling <code class="docutils literal notranslate"><span class="pre">get&lt;_InT&gt;()</span></code>. </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Args</span></code>: The arguments of _ImV to use during construction. All arguments are constructed by the IoC Container, so it is not possible to pass additional arguments. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4I00DpEN3vul3ioc2di13add_singletonEiv">
+<span id="_CPPv3I00DpEN3vul3ioc2di13add_singletonEv"></span><span id="_CPPv2I00DpEN3vul3ioc2di13add_singletonEv"></span>template&lt;class <code class="sig-name descname">_InT</code>, class <code class="sig-name descname">_ImV</code>, class ...<code class="sig-name descname">Args</code>&gt;<br /><span class="target" id="classvul_1_1ioc_1_1di_1adb82b2b2202fd4fa9d038921aed31a63"></span>int <code class="sig-name descname">add_singleton</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4I00DpEN3vul3ioc2di13add_singletonEiv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Add an interface and implementation to the singleton mapping cache. </p>
+<p>Add a singleton factory method to create objects of type _ImV, when requested using the interface of type _InT. On every subsequent call of <code class="docutils literal notranslate"><span class="pre">get&lt;_InT&gt;()</span></code> the same instance of _ImV will be returned.</p>
+<p><dl class="simple">
+<dt><strong>Template Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">_InT</span></code>: The interface to use for mapping. Use this type to get instances in the future. </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">_ImV</span></code>: The implementation to use for mapping. Objects of this type are constructed, when calling <code class="docutils literal notranslate"><span class="pre">get&lt;_InT&gt;()</span></code>. </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Args</span></code>: The arguments of _ImV to use during construction. All arguments are constructed by the IoC Container, so it is not possible to pass additional arguments. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="scope-api">
+<h2><a class="toc-backref" href="#id3">Scope API</a><a class="headerlink" href="#scope-api" title="Permalink to this headline">¶</a></h2>
+<dl class="cpp class">
+<dt id="_CPPv4N3vul3ioc14di_basic_scopeE">
+<span id="_CPPv3N3vul3ioc14di_basic_scopeE"></span><span id="_CPPv2N3vul3ioc14di_basic_scopeE"></span><span id="vul::ioc::di_basic_scope"></span><span class="target" id="classvul_1_1ioc_1_1di__basic__scope"></span><em class="property">class </em><code class="sig-prename descclassname">vul::ioc<code class="sig-prename descclassname">::</code></code><code class="sig-name descname">di_basic_scope</code><a class="headerlink" href="#_CPPv4N3vul3ioc14di_basic_scopeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A basic scope class, holding the value, generated by the IoC Container. It shouldn’t be constructed by itself. Use the inherited classes. </p>
+<p>Subclassed by <a class="reference internal" href="#classvul_1_1ioc_1_1di__scope"><span class="std std-ref">vul::ioc::di_scope&lt; _Ty &gt;</span></a></p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Functions</p>
+<dl class="cpp function">
+<dt id="_CPPv4N3vul3ioc14di_basic_scope14di_basic_scopeEPbPvPv">
+<span id="_CPPv3N3vul3ioc14di_basic_scope14di_basic_scopeEPbPvPv"></span><span id="_CPPv2N3vul3ioc14di_basic_scope14di_basic_scopeEPbPvPv"></span><span id="vul::ioc::di_basic_scope::di_basic_scope__bP.voidP.voidP"></span><span class="target" id="classvul_1_1ioc_1_1di__basic__scope_1a9847c264283d02fd493115ca18ab91e3"></span><code class="sig-name descname">di_basic_scope</code><span class="sig-paren">(</span>bool *<em>is_scope</em>, void *<em>value</em>, void *<em>di</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul3ioc14di_basic_scope14di_basic_scopeEPbPvPv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct a basic scope with a value and additional parameters, that indicate state.</p>
+<p><dl class="simple">
+<dt><strong>Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">[in]</span> <span class="pre">is_scope</span></code>: Indicates if the current scope object is active. </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[in]</span> <span class="pre">value</span></code>: The value, constructed by the IoC Container. </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[in]</span> <span class="pre">di</span></code>: A pointer to the IoC Container instance, used for cross-referencing. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3vul3ioc14di_basic_scopeD0Ev">
+<span id="_CPPv3N3vul3ioc14di_basic_scopeD0Ev"></span><span id="_CPPv2N3vul3ioc14di_basic_scopeD0Ev"></span><span id="vul::ioc::di_basic_scope::~di_basic_scope"></span><span class="target" id="classvul_1_1ioc_1_1di__basic__scope_1ae3d29937c338ed595ef634bbe41e1a76"></span><code class="sig-name descname">~di_basic_scope</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul3ioc14di_basic_scopeD0Ev" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A virtual destructor to ensure correct destruction of descendants. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3vul3ioc14di_basic_scope3putEPv">
+<span id="_CPPv3N3vul3ioc14di_basic_scope3putEPv"></span><span id="_CPPv2N3vul3ioc14di_basic_scope3putEPv"></span><span id="vul::ioc::di_basic_scope::put__voidP"></span><span class="target" id="classvul_1_1ioc_1_1di__basic__scope_1ac4149f9e345a3fc2b1b378fbc62228ef"></span>int <code class="sig-name descname">put</code><span class="sig-paren">(</span>void *<em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul3ioc14di_basic_scope3putEPv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Put a new value inside the scope. Disregards the old value and <strong>breaks automatic memory management</strong>.</p>
+<p>The value, cleared by the automatic memory manager, will be the original, not the replacement. In order to use this function, the user has to manually deallocate the replacement value.</p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>1 if the replacement succeeded, 0 otherwise. </p>
+</dd>
+<dt><strong>Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">[in]</span> <span class="pre">value</span></code>: The replacement value for the scope object. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3vul3ioc14di_basic_scope5clearEv">
+<span id="_CPPv3N3vul3ioc14di_basic_scope5clearEv"></span><span id="_CPPv2N3vul3ioc14di_basic_scope5clearEv"></span><span id="vul::ioc::di_basic_scope::clear"></span><span class="target" id="classvul_1_1ioc_1_1di__basic__scope_1afedfe4583d7ea47607398ce2a325a172"></span>int <code class="sig-name descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul3ioc14di_basic_scope5clearEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Clear the value inside the scope. Sets the stored value to <code class="docutils literal notranslate"><span class="pre">nullptr</span></code>. Disregards the old value and breaks automatic memory management**.</p>
+<p>The value, cleared by the automatic memory manager, will be the old value, disregarding this clear procedure. In order to use this function, the user has to manually deallocate the replacement value.</p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>1 if the replacement succeeded, 0 otherwise. </p>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3vul3ioc14di_basic_scope9set_scopeEb">
+<span id="_CPPv3N3vul3ioc14di_basic_scope9set_scopeEb"></span><span id="_CPPv2N3vul3ioc14di_basic_scope9set_scopeEb"></span><span id="vul::ioc::di_basic_scope::set_scope__b"></span><span class="target" id="classvul_1_1ioc_1_1di__basic__scope_1a6b3aaac32d6f8ef659d2ec3a73269bb6"></span>int <code class="sig-name descname">set_scope</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul3ioc14di_basic_scope9set_scopeEb" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Indicate if this scope object is active.</p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>1 if the function succeeded, 0 otherwise. </p>
+</dd>
+<dt><strong>Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">[in]</span> <span class="pre">value</span></code>: The value indicating if this scope is active. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3vul3ioc14di_basic_scope8is_scopeEv">
+<span id="_CPPv3N3vul3ioc14di_basic_scope8is_scopeEv"></span><span id="_CPPv2N3vul3ioc14di_basic_scope8is_scopeEv"></span><span id="vul::ioc::di_basic_scope::is_scope"></span><span class="target" id="classvul_1_1ioc_1_1di__basic__scope_1a34d1ca6b4b4b7c25076a4a08aa03ec69"></span>bool <code class="sig-name descname">is_scope</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul3ioc14di_basic_scope8is_scopeEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Check if this scope object is active. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3vul3ioc14di_basic_scope3ptrEv">
+<span id="_CPPv3N3vul3ioc14di_basic_scope3ptrEv"></span><span id="_CPPv2N3vul3ioc14di_basic_scope3ptrEv"></span><span id="vul::ioc::di_basic_scope::ptr"></span><span class="target" id="classvul_1_1ioc_1_1di__basic__scope_1a32eb16ac6c04816bfcf9c77561e62866"></span>void *<code class="sig-name descname">ptr</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul3ioc14di_basic_scope3ptrEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Get the stored value pointer. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4NK3vul3ioc14di_basic_scope3ptrEv">
+<span id="_CPPv3NK3vul3ioc14di_basic_scope3ptrEv"></span><span id="_CPPv2NK3vul3ioc14di_basic_scope3ptrEv"></span><span id="vul::ioc::di_basic_scope::ptrC"></span><span class="target" id="classvul_1_1ioc_1_1di__basic__scope_1a001e0ee20563b72058d7f8710797fd51"></span><em class="property">const</em> void *<code class="sig-name descname">ptr</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3vul3ioc14di_basic_scope3ptrEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Get the stored value pointer. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3vul3ioc14di_basic_scope2diEv">
+<span id="_CPPv3N3vul3ioc14di_basic_scope2diEv"></span><span id="_CPPv2N3vul3ioc14di_basic_scope2diEv"></span><span id="vul::ioc::di_basic_scope::di"></span><span class="target" id="classvul_1_1ioc_1_1di__basic__scope_1afd496c04ce7027e4f9bc45ec54d17885"></span>void *<code class="sig-name descname">di</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul3ioc14di_basic_scope2diEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Get the stored di context. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4NK3vul3ioc14di_basic_scope2diEv">
+<span id="_CPPv3NK3vul3ioc14di_basic_scope2diEv"></span><span id="_CPPv2NK3vul3ioc14di_basic_scope2diEv"></span><span id="vul::ioc::di_basic_scope::diC"></span><span class="target" id="classvul_1_1ioc_1_1di__basic__scope_1a56f2afc2a60d0c6c48e432b1d1bb6ce5"></span><em class="property">const</em> void *<code class="sig-name descname">di</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3vul3ioc14di_basic_scope2diEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Get the stored di context. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp class">
+<dt id="_CPPv4I0EN3vul3ioc8di_scopeE">
+<span id="_CPPv3I0EN3vul3ioc8di_scopeE"></span><span id="_CPPv2I0EN3vul3ioc8di_scopeE"></span>template&lt;class <code class="sig-name descname">_Ty</code>&gt;<br /><span class="target" id="classvul_1_1ioc_1_1di__scope"></span><em class="property">class </em><code class="sig-prename descclassname">vul::ioc<code class="sig-prename descclassname">::</code></code><code class="sig-name descname">di_scope</code> : <em class="property">public</em> vul::ioc::<a class="reference internal" href="#_CPPv4N3vul3ioc14di_basic_scopeE" title="vul::ioc::di_basic_scope">di_basic_scope</a><a class="headerlink" href="#_CPPv4I0EN3vul3ioc8di_scopeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A templated scope to store a specific value inside.</p>
+<p><dl class="simple">
+<dt><strong>Template Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">_Ty</span></code>: The type of value to be stored. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+<p>Subclassed by <a class="reference internal" href="#classvul_1_1ioc_1_1di__scope__singleton"><span class="std std-ref">vul::ioc::di_scope_singleton&lt; _Ty &gt;</span></a>, <a class="reference internal" href="#classvul_1_1ioc_1_1di__scope__transient"><span class="std std-ref">vul::ioc::di_scope_transient&lt; _Ty &gt;</span></a></p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Types</p>
+<dl class="cpp type">
+<dt id="_CPPv4N3vul3ioc8di_scope13initial_scopeE">
+<span id="_CPPv3N3vul3ioc8di_scope13initial_scopeE"></span><span id="_CPPv2N3vul3ioc8di_scope13initial_scopeE"></span><span class="target" id="classvul_1_1ioc_1_1di__scope_1a559a2e699b47334f31187b376c89cfc3"></span><em class="property">using </em><code class="sig-name descname">initial_scope</code> = std::true_type<a class="headerlink" href="#_CPPv4N3vul3ioc8di_scope13initial_scopeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Sets the initial active or inactive state. </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Functions</p>
+<dl class="cpp function">
+<dt id="_CPPv4N3vul3ioc8di_scope8di_scopeEPbP3_TyPv">
+<span id="_CPPv3N3vul3ioc8di_scope8di_scopeEPbP3_TyPv"></span><span id="_CPPv2N3vul3ioc8di_scope8di_scopeEPbP3_TyPv"></span><span id="vul::ioc::di_scope::di_scope__bP._TyP.voidP"></span><span class="target" id="classvul_1_1ioc_1_1di__scope_1a5e593ab6a0176ab4e3a92ef7d79ef6fd"></span><code class="sig-name descname">di_scope</code><span class="sig-paren">(</span>bool *<em>is_scope</em>, <a class="reference internal" href="#_CPPv4I0EN3vul3ioc8di_scopeE" title="vul::ioc::di_scope::_Ty">_Ty</a> *<em>value</em>, void *<em>di</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul3ioc8di_scope8di_scopeEPbP3_TyPv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct a templated scope with a value and additional parameters, that indicate state.</p>
+<p><dl class="simple">
+<dt><strong>Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">[in]</span> <span class="pre">is_scope</span></code>: Indicates if the current scope object is active. </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[in]</span> <span class="pre">value</span></code>: The value, constructed by the IoC Container. </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[in]</span> <span class="pre">di</span></code>: A pointer to the IoC Container instance, used for cross-referencing. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3vul3ioc8di_scope3getEv">
+<span id="_CPPv3N3vul3ioc8di_scope3getEv"></span><span id="_CPPv2N3vul3ioc8di_scope3getEv"></span><span id="vul::ioc::di_scope::get"></span><span class="target" id="classvul_1_1ioc_1_1di__scope_1a2df7e5c1a2d4d24e5d0b2b09fed9e4f3"></span><a class="reference internal" href="#_CPPv4I0EN3vul3ioc8di_scopeE" title="vul::ioc::di_scope::_Ty">_Ty</a> *<code class="sig-name descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul3ioc8di_scope3getEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Get the poiner to the stored object in a specific type. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp class">
+<dt id="_CPPv4I0EN3vul3ioc18di_scope_singletonE">
+<span id="_CPPv3I0EN3vul3ioc18di_scope_singletonE"></span><span id="_CPPv2I0EN3vul3ioc18di_scope_singletonE"></span>template&lt;class <code class="sig-name descname">_Ty</code>&gt;<br /><span class="target" id="classvul_1_1ioc_1_1di__scope__singleton"></span><em class="property">class </em><code class="sig-prename descclassname">vul::ioc<code class="sig-prename descclassname">::</code></code><code class="sig-name descname">di_scope_singleton</code> : <em class="property">public</em> vul::ioc::<a class="reference internal" href="#_CPPv4I0EN3vul3ioc8di_scopeE" title="vul::ioc::di_scope">di_scope</a>&lt;<a class="reference internal" href="#_CPPv4I0EN3vul3ioc18di_scope_singletonE" title="vul::ioc::di_scope_singleton::_Ty">_Ty</a>&gt;<a class="headerlink" href="#_CPPv4I0EN3vul3ioc18di_scope_singletonE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A singleton scope to store a specific value inside.</p>
+<p><dl class="simple">
+<dt><strong>Template Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">_Ty</span></code>: The type of value to be stored. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Types</p>
+<dl class="cpp type">
+<dt id="_CPPv4N3vul3ioc18di_scope_singleton13initial_scopeE">
+<span id="_CPPv3N3vul3ioc18di_scope_singleton13initial_scopeE"></span><span id="_CPPv2N3vul3ioc18di_scope_singleton13initial_scopeE"></span><span class="target" id="classvul_1_1ioc_1_1di__scope__singleton_1a1e2116805e6b76dfb2b617b98d1fb7fd"></span><em class="property">using </em><code class="sig-name descname">initial_scope</code> = std::true_type<a class="headerlink" href="#_CPPv4N3vul3ioc18di_scope_singleton13initial_scopeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Sets the initial active or inactive state. </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Functions</p>
+<dl class="cpp function">
+<dt id="_CPPv4N3vul3ioc18di_scope_singleton18di_scope_singletonEPbP3_TyPv">
+<span id="_CPPv3N3vul3ioc18di_scope_singleton18di_scope_singletonEPbP3_TyPv"></span><span id="_CPPv2N3vul3ioc18di_scope_singleton18di_scope_singletonEPbP3_TyPv"></span><span id="vul::ioc::di_scope_singleton::di_scope_singleton__bP._TyP.voidP"></span><span class="target" id="classvul_1_1ioc_1_1di__scope__singleton_1a80422c3717e29fdf25b1dc5fdfdca6cc"></span><code class="sig-name descname">di_scope_singleton</code><span class="sig-paren">(</span>bool *<em>is_scope</em>, <a class="reference internal" href="#_CPPv4I0EN3vul3ioc18di_scope_singletonE" title="vul::ioc::di_scope_singleton::_Ty">_Ty</a> *<em>value</em>, void *<em>di</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul3ioc18di_scope_singleton18di_scope_singletonEPbP3_TyPv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct a singleton scope with a value and additional parameters, that indicate state. This scope does <strong>not</strong> store a single value. IoC Container instantiates and tracks only a single object of this class.</p>
+<p><dl class="simple">
+<dt><strong>Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">[in]</span> <span class="pre">is_scope</span></code>: Indicates if the current scope object is active. </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[in]</span> <span class="pre">value</span></code>: The value, constructed by the ioc container. </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[in]</span> <span class="pre">di</span></code>: A pointer to the ioc container instance, used for cross-referencing. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3vul3ioc18di_scope_singleton9set_scopeEb">
+<span id="_CPPv3N3vul3ioc18di_scope_singleton9set_scopeEb"></span><span id="_CPPv2N3vul3ioc18di_scope_singleton9set_scopeEb"></span><span id="vul::ioc::di_scope_singleton::set_scope__b"></span><span class="target" id="classvul_1_1ioc_1_1di__scope__singleton_1a3455bee5a59796c42a32dfc76650d032"></span>int <code class="sig-name descname">set_scope</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span> <em class="property">override</em><a class="headerlink" href="#_CPPv4N3vul3ioc18di_scope_singleton9set_scopeEb" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Indicate if this scope object is active.</p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>1 if the function succeeded, 0 otherwise. </p>
+</dd>
+<dt><strong>Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">[in]</span> <span class="pre">value</span></code>: The value indicating if this scope is active. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp class">
+<dt id="_CPPv4I0EN3vul3ioc18di_scope_transientE">
+<span id="_CPPv3I0EN3vul3ioc18di_scope_transientE"></span><span id="_CPPv2I0EN3vul3ioc18di_scope_transientE"></span>template&lt;class <code class="sig-name descname">_Ty</code>&gt;<br /><span class="target" id="classvul_1_1ioc_1_1di__scope__transient"></span><em class="property">class </em><code class="sig-prename descclassname">vul::ioc<code class="sig-prename descclassname">::</code></code><code class="sig-name descname">di_scope_transient</code> : <em class="property">public</em> vul::ioc::<a class="reference internal" href="#_CPPv4I0EN3vul3ioc8di_scopeE" title="vul::ioc::di_scope">di_scope</a>&lt;<a class="reference internal" href="#_CPPv4I0EN3vul3ioc18di_scope_transientE" title="vul::ioc::di_scope_transient::_Ty">_Ty</a>&gt;<a class="headerlink" href="#_CPPv4I0EN3vul3ioc18di_scope_transientE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A transient scope to store a specific value inside.</p>
+<p><dl class="simple">
+<dt><strong>Template Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">_Ty</span></code>: The type of value to be stored. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Types</p>
+<dl class="cpp type">
+<dt id="_CPPv4N3vul3ioc18di_scope_transient13initial_scopeE">
+<span id="_CPPv3N3vul3ioc18di_scope_transient13initial_scopeE"></span><span id="_CPPv2N3vul3ioc18di_scope_transient13initial_scopeE"></span><span class="target" id="classvul_1_1ioc_1_1di__scope__transient_1a25bc5281429ff171e443d14d61249679"></span><em class="property">using </em><code class="sig-name descname">initial_scope</code> = std::true_type<a class="headerlink" href="#_CPPv4N3vul3ioc18di_scope_transient13initial_scopeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Sets the initial active or inactive state. </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Functions</p>
+<dl class="cpp function">
+<dt id="_CPPv4N3vul3ioc18di_scope_transient18di_scope_transientEPbP3_TyPv">
+<span id="_CPPv3N3vul3ioc18di_scope_transient18di_scope_transientEPbP3_TyPv"></span><span id="_CPPv2N3vul3ioc18di_scope_transient18di_scope_transientEPbP3_TyPv"></span><span id="vul::ioc::di_scope_transient::di_scope_transient__bP._TyP.voidP"></span><span class="target" id="classvul_1_1ioc_1_1di__scope__transient_1a2fb405730ebc7572538dc5015ad864ac"></span><code class="sig-name descname">di_scope_transient</code><span class="sig-paren">(</span>bool *<em>is_scope</em>, <a class="reference internal" href="#_CPPv4I0EN3vul3ioc18di_scope_transientE" title="vul::ioc::di_scope_transient::_Ty">_Ty</a> *<em>value</em>, void *<em>di</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul3ioc18di_scope_transient18di_scope_transientEPbP3_TyPv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct a transient scope with a value and additional parameters, that indicate state. Each transient scope, returned from IoC Container, should be different.</p>
+<p><dl class="simple">
+<dt><strong>Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">[in]</span> <span class="pre">is_scope</span></code>: Indicates if the current scope object is active. </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[in]</span> <span class="pre">value</span></code>: The value, constructed by the IoC Container. </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[in]</span> <span class="pre">di</span></code>: A pointer to the IoC Container instance, used for cross-referencing. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3vul3ioc18di_scope_transient3getEv">
+<span id="_CPPv3N3vul3ioc18di_scope_transient3getEv"></span><span id="_CPPv2N3vul3ioc18di_scope_transient3getEv"></span><span id="vul::ioc::di_scope_transient::get"></span><span class="target" id="classvul_1_1ioc_1_1di__scope__transient_1a7220578b54f4e8c36395dc21f17bb691"></span><a class="reference internal" href="#_CPPv4I0EN3vul3ioc18di_scope_transientE" title="vul::ioc::di_scope_transient::_Ty">_Ty</a> *<code class="sig-name descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">override</em><a class="headerlink" href="#_CPPv4N3vul3ioc18di_scope_transient3getEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Get the poiner to the stored object in a specific type. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="../patterns/raii.html" class="btn btn-neutral float-left" title="RAII" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, mcmikecreations
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,358 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>RAII &mdash; Vivid Engine  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="VUL IoC" href="../ioc/ioc.html" />
+    <link rel="prev" title="Managed singleton" href="managed_singleton.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Vivid Engine
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../vul.html">VUL docs</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="patterns.html">VUL Patterns</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="managed_singleton.html">Managed singleton</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">RAII</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api">API</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../ioc/ioc.html">VUL IoC</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Vivid Engine</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../vul.html">VUL Docs Home</a> &raquo;</li>
+        
+          <li><a href="patterns.html">VUL Patterns</a> &raquo;</li>
+        
+      <li>RAII</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/vul/patterns/raii.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="raii">
+<span id="vul-patterns-raii-my"></span><h1>RAII<a class="headerlink" href="#raii" title="Permalink to this headline">¶</a></h1>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#usage" id="id1">Usage</a></p></li>
+<li><p><a class="reference internal" href="#api" id="id2">API</a></p></li>
+</ul>
+</div>
+<p>RAII is a class, that can be used as a wrapper around a variable of type, that
+has explicit initialization and termination routines (<code class="code docutils literal notranslate"><span class="pre">init()</span></code> and
+<code class="code docutils literal notranslate"><span class="pre">term()</span></code>). If the <code class="code docutils literal notranslate"><span class="pre">init()</span></code> call happens at the beginning of a
+function and <code class="code docutils literal notranslate"><span class="pre">term()</span></code> is called at the end, it is wise to use this wrapper
+not to call these functions manually.</p>
+<div class="section" id="usage">
+<h2><a class="toc-backref" href="#id1">Usage</a><a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="n">raii</span><span class="o">&lt;</span><span class="n">managed_singleton</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;&gt;</span> <span class="n">r</span><span class="p">(</span><span class="n">managed_singleton</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="p">(),</span> <span class="mf">5.6f</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">r</span><span class="p">.</span><span class="n">is_init</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="n">abort</span><span class="p">();</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">managed_singleton</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;::</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span> <span class="c1">//5.6</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">r</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span> <span class="c1">//5.6</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">r</span><span class="o">-&gt;</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span> <span class="c1">//5.6</span>
+    <span class="c1">//term() will be called automatically</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This class does not use any special thread safety mechanisms.</p>
+</div>
+</div>
+<div class="section" id="api">
+<h2><a class="toc-backref" href="#id2">API</a><a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h2>
+<dl class="cpp class">
+<dt id="_CPPv4I0EN3vul8patterns4raiiE">
+<span id="_CPPv3I0EN3vul8patterns4raiiE"></span><span id="_CPPv2I0EN3vul8patterns4raiiE"></span>template&lt;class <code class="sig-name descname">_Ty</code>&gt;<br /><span class="target" id="classvul_1_1patterns_1_1raii"></span><em class="property">class </em><code class="sig-prename descclassname">vul::patterns<code class="sig-prename descclassname">::</code></code><code class="sig-name descname">raii</code><a class="headerlink" href="#_CPPv4I0EN3vul8patterns4raiiE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A class that implements the RAII technique / pattern for use inside the library. </p>
+<p>This class manages an instance of any type, that supports initialization and termination routines. Initialization can take any arguments, while termination needs to be parameter-less.</p>
+<p>In general, this class can be used as a wrapper around a variable that requires proper initialization and termination and you don’t want to forget to call these routines.</p>
+<p><dl class="simple">
+<dt><strong>Template Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">_Ty</span></code>: The type of the value reference, stored inside the raii object. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Functions</p>
+<dl class="cpp function">
+<dt id="_CPPv4N3vul8patterns4raii4raiiERR3_Ty">
+<span id="_CPPv3N3vul8patterns4raii4raiiERR3_Ty"></span><span id="_CPPv2N3vul8patterns4raii4raiiERR3_Ty"></span><span id="vul::patterns::raii::raii___TyRR"></span><span class="target" id="classvul_1_1patterns_1_1raii_1a588a509158bc70e028f21b245574b377"></span><code class="sig-name descname">raii</code><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0EN3vul8patterns4raiiE" title="vul::patterns::raii::_Ty">_Ty</a> &amp;&amp;<em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul8patterns4raii4raiiERR3_Ty" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct the object, using an existing reference. This constructor has no guarantees of moving the reference inside the raii object.</p>
+<p><dl class="simple">
+<dt><strong>Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">[in]</span> <span class="pre">value</span></code>: The value to wrap around with the raii object. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4IDpEN3vul8patterns4raii4raiiERR3_TyDp4Args">
+<span id="_CPPv3IDpEN3vul8patterns4raii4raiiERR3_TyDp4Args"></span><span id="_CPPv2IDpEN3vul8patterns4raii4raiiERR3_TyDp4Args"></span>template&lt;class ...<code class="sig-name descname">Args</code>&gt;<br /><span class="target" id="classvul_1_1patterns_1_1raii_1a1a271e5fa381ba662c82f29e57c0474d"></span><code class="sig-name descname">raii</code><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0EN3vul8patterns4raiiE" title="vul::patterns::raii::_Ty">_Ty</a> &amp;&amp;<em>value</em>, <a class="reference internal" href="#_CPPv4IDpEN3vul8patterns4raii4raiiERR3_TyDp4Args" title="vul::patterns::raii::raii::Args">Args</a>... <em>args</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4IDpEN3vul8patterns4raii4raiiERR3_TyDp4Args" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct the object, using an existing reference. Than initialize this reference using the supplied arguments.</p>
+<p><dl class="simple">
+<dt><strong>Template Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Args</span></code>: The argument types, passed to initialize the stored value. </p></li>
+</ul>
+</dd>
+<dt><strong>Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">[in]</span> <span class="pre">args</span></code>: The arguments, passed to initialize the stored value. If args is only a raii_dummy, the value is initialized with an parameter-less initialization routine. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3vul8patterns4raiiD0Ev">
+<span id="_CPPv3N3vul8patterns4raiiD0Ev"></span><span id="_CPPv2N3vul8patterns4raiiD0Ev"></span><span id="vul::patterns::raii::~raii"></span><span class="target" id="classvul_1_1patterns_1_1raii_1a6fc4a41e0daaaa37d203dd80fb53fad6"></span><code class="sig-name descname">~raii</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul8patterns4raiiD0Ev" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Calls termination routine of the stored value. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4IDpEN3vul8patterns4raii4initEiDp4Args">
+<span id="_CPPv3IDpEN3vul8patterns4raii4initEDp4Args"></span><span id="_CPPv2IDpEN3vul8patterns4raii4initEDp4Args"></span>template&lt;class ...<code class="sig-name descname">Args</code>&gt;<br /><span class="target" id="classvul_1_1patterns_1_1raii_1a8b4e42f5331e66a7dcdf29f58258e3bd"></span>int <code class="sig-name descname">init</code><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4IDpEN3vul8patterns4raii4initEiDp4Args" title="vul::patterns::raii::init::Args">Args</a>... <em>args</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4IDpEN3vul8patterns4raii4initEiDp4Args" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Call the initialization routine of the stored reference using the supplied arguments.</p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>1 if the stored value was initialized, 0 otherwise. </p>
+</dd>
+<dt><strong>Template Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Args</span></code>: The argument types, passed to initialize the stored value. </p></li>
+</ul>
+</dd>
+<dt><strong>Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">[in]</span> <span class="pre">args</span></code>: The arguments, passed to initialize the stored value. If no args are specified, the parameter-less version is called. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3vul8patterns4raii4termEv">
+<span id="_CPPv3N3vul8patterns4raii4termEv"></span><span id="_CPPv2N3vul8patterns4raii4termEv"></span><span id="vul::patterns::raii::term"></span><span class="target" id="classvul_1_1patterns_1_1raii_1a6e98366afd17d317e469eb084edfec18"></span>int <code class="sig-name descname">term</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul8patterns4raii4termEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Call the termination routine of the stored reference.</p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>1 if the stored value’s termination routine succeeded, 0 otherwise. </p>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4NK3vul8patterns4raii3getEv">
+<span id="_CPPv3NK3vul8patterns4raii3getEv"></span><span id="_CPPv2NK3vul8patterns4raii3getEv"></span><span id="vul::patterns::raii::getC"></span><span class="target" id="classvul_1_1patterns_1_1raii_1a213d66015548764129adc7ed1f64fe7e"></span><em class="property">const</em> <a class="reference internal" href="#_CPPv4I0EN3vul8patterns4raiiE" title="vul::patterns::raii::_Ty">_Ty</a> &amp;<code class="sig-name descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3vul8patterns4raii3getEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Get the value reference, stored inside the raii object. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3vul8patterns4raii3getEv">
+<span id="_CPPv3N3vul8patterns4raii3getEv"></span><span id="_CPPv2N3vul8patterns4raii3getEv"></span><span id="vul::patterns::raii::get"></span><span class="target" id="classvul_1_1patterns_1_1raii_1ab2102630af194ec0bd192c1eeb20d3c8"></span><a class="reference internal" href="#_CPPv4I0EN3vul8patterns4raiiE" title="vul::patterns::raii::_Ty">_Ty</a> &amp;<code class="sig-name descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul8patterns4raii3getEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Get the value reference, stored inside the raii object. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3vul8patterns4raiiptEv">
+<span id="_CPPv3N3vul8patterns4raiiptEv"></span><span id="_CPPv2N3vul8patterns4raiiptEv"></span><span id="vul::patterns::raii::pointer-operator"></span><span class="target" id="classvul_1_1patterns_1_1raii_1a42bfdf356893a317da2d9b4dc3a98964"></span><a class="reference internal" href="#_CPPv4I0EN3vul8patterns4raiiE" title="vul::patterns::raii::_Ty">_Ty</a> *<code class="sig-name descname">operator-&gt;</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul8patterns4raiiptEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A helper operator to access the members of stored value. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4NK3vul8patterns4raii7is_initEv">
+<span id="_CPPv3NK3vul8patterns4raii7is_initEv"></span><span id="_CPPv2NK3vul8patterns4raii7is_initEv"></span><span id="vul::patterns::raii::is_initC"></span><span class="target" id="classvul_1_1patterns_1_1raii_1a5e12779e70fdd77c2f4f70d79084bd9f"></span>int <code class="sig-name descname">is_init</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3vul8patterns4raii7is_initEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Check if the stored value reference is initialized. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../ioc/ioc.html" class="btn btn-neutral float-right" title="VUL IoC" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="managed_singleton.html" class="btn btn-neutral float-left" title="Managed singleton" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, mcmikecreations
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

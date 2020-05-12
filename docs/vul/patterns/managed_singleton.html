@@ -1,0 +1,375 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Managed singleton &mdash; Vivid Engine  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="RAII" href="raii.html" />
+    <link rel="prev" title="VUL Patterns" href="patterns.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Vivid Engine
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../vul.html">VUL docs</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="patterns.html">VUL Patterns</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Managed singleton</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#example">Example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api">API</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="raii.html">RAII</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../ioc/ioc.html">VUL IoC</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Vivid Engine</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../vul.html">VUL Docs Home</a> &raquo;</li>
+        
+          <li><a href="patterns.html">VUL Patterns</a> &raquo;</li>
+        
+      <li>Managed singleton</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/vul/patterns/managed_singleton.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="managed-singleton">
+<span id="vul-patterns-managed-singleton-my"></span><h1>Managed singleton<a class="headerlink" href="#managed-singleton" title="Permalink to this headline">¶</a></h1>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#usage" id="id1">Usage</a></p></li>
+<li><p><a class="reference internal" href="#example" id="id2">Example</a></p></li>
+<li><p><a class="reference internal" href="#api" id="id3">API</a></p></li>
+</ul>
+</div>
+<p>Managed singleton is a class, that can be used for program-level singleton
+values. It is similar to an ordinary singleton pattern, but it has a clear
+value lifetime and can’t be altered directly from other places within the
+program.</p>
+<div class="section" id="usage">
+<h2><a class="toc-backref" href="#id1">Usage</a><a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">managed_singleton</span><span class="o">&lt;</span><span class="n">logger</span><span class="o">&gt;</span> <span class="n">a</span><span class="p">;</span>
+<span class="c1">//Calling get or ptr before init leads to undefined behavior.</span>
+<span class="k">if</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">init</span><span class="p">(</span><span class="s">&quot;log.txt&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="n">abort</span><span class="p">();</span>
+<span class="c1">//Use static get() or ptr() to get the variable.</span>
+<span class="c1">//They can be called anywhere inside the program between init and term</span>
+<span class="n">managed_singleton</span><span class="o">&lt;</span><span class="n">logger</span><span class="o">&gt;::</span><span class="n">get</span><span class="p">().</span><span class="n">log</span><span class="p">(</span><span class="s">&quot;Hello world!&quot;</span><span class="p">);</span>
+<span class="n">managed_singleton</span><span class="o">&lt;</span><span class="n">logger</span><span class="o">&gt;::</span><span class="n">ptr</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">log</span><span class="p">(</span><span class="s">&quot;Goodbye world!&quot;</span><span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">term</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="n">abort</span><span class="p">();</span>
+</pre></div>
+</div>
+<div class="admonition danger">
+<p class="admonition-title">Danger</p>
+<p>Do not call <code class="code docutils literal notranslate"><span class="pre">init()</span></code> or <code class="code docutils literal notranslate"><span class="pre">term()</span></code> for more than one instance of
+the same type of this class. This will lead to memory corruption.</p>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>This class does not terminate on destruction, you have to call <code class="code docutils literal notranslate"><span class="pre">term()</span></code>
+manually.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This class does not use any special thread safety mechanisms.</p>
+</div>
+</div>
+<div class="section" id="example">
+<h2><a class="toc-backref" href="#id2">Example</a><a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">log_thing</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">managed_singleton</span><span class="o">&lt;</span><span class="n">logger</span><span class="o">&gt;::</span><span class="n">get</span><span class="p">().</span><span class="n">log</span><span class="p">(</span><span class="s">&quot;thing&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">managed_singleton</span><span class="o">&lt;</span><span class="n">logger</span><span class="o">&gt;</span> <span class="n">a</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">init</span><span class="p">(</span><span class="s">&quot;log.txt&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">log_thing</span><span class="p">();</span>
+    <span class="n">a</span><span class="p">.</span><span class="n">term</span><span class="p">();</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="api">
+<h2><a class="toc-backref" href="#id3">API</a><a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h2>
+<dl class="cpp class">
+<dt id="_CPPv4I0I0E0EN3vul8patterns17managed_singletonE">
+<span id="_CPPv3I0I0E0EN3vul8patterns17managed_singletonE"></span><span id="_CPPv2I0I0E0EN3vul8patterns17managed_singletonE"></span>template&lt;class <code class="sig-name descname">_Ty</code>, template&lt;class&gt; class <code class="sig-name descname">_Alloc</code> = std::allocator&gt;<br /><span class="target" id="classvul_1_1patterns_1_1managed__singleton"></span><em class="property">class </em><code class="sig-prename descclassname">vul::patterns<code class="sig-prename descclassname">::</code></code><code class="sig-name descname">managed_singleton</code><a class="headerlink" href="#_CPPv4I0I0E0EN3vul8patterns17managed_singletonE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Allows to manage lifetime of a singleton value. </p>
+<p>Managed singleton is similar to the singleton pattern, but allows users to strictly manage the lifetime of the underlying value.</p>
+<p><dl class="simple">
+<dt><strong>Template Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">_Ty</span></code>: The type of the value. </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">_Alloc</span></code>: Allocator type used to create and destroy the value. By default _Alloc is an std::allocator, meaning that the new and delete operators will be used. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Types</p>
+<dl class="cpp type">
+<dt id="_CPPv4N3vul8patterns17managed_singleton10value_typeE">
+<span id="_CPPv3N3vul8patterns17managed_singleton10value_typeE"></span><span id="_CPPv2N3vul8patterns17managed_singleton10value_typeE"></span><span class="target" id="classvul_1_1patterns_1_1managed__singleton_1adcf545e682e2a08b4aa99cdb69b4f4d8"></span><em class="property">using </em><code class="sig-name descname">value_type</code> = <a class="reference internal" href="#_CPPv4I0I0E0EN3vul8patterns17managed_singletonE" title="vul::patterns::managed_singleton::_Ty">_Ty</a><a class="headerlink" href="#_CPPv4N3vul8patterns17managed_singleton10value_typeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>The type of the value, stored in the <a class="reference internal" href="#classvul_1_1patterns_1_1managed__singleton"><span class="std std-ref">managed_singleton</span></a>. </p>
+</dd></dl>
+
+<dl class="cpp type">
+<dt id="_CPPv4N3vul8patterns17managed_singleton14allocator_typeE">
+<span id="_CPPv3N3vul8patterns17managed_singleton14allocator_typeE"></span><span id="_CPPv2N3vul8patterns17managed_singleton14allocator_typeE"></span><span class="target" id="classvul_1_1patterns_1_1managed__singleton_1a16e1239b1f55ae54a8fe3f5a8c015441"></span><em class="property">using </em><code class="sig-name descname">allocator_type</code> = <a class="reference internal" href="#_CPPv4I0I0E0EN3vul8patterns17managed_singletonE" title="vul::patterns::managed_singleton::_Alloc">_Alloc</a>&lt;<a class="reference internal" href="#_CPPv4I0I0E0EN3vul8patterns17managed_singletonE" title="vul::patterns::managed_singleton::_Ty">_Ty</a>&gt;<a class="headerlink" href="#_CPPv4N3vul8patterns17managed_singleton14allocator_typeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>The type of the allocator, stored in the <a class="reference internal" href="#classvul_1_1patterns_1_1managed__singleton"><span class="std std-ref">managed_singleton</span></a> and used to create and destroy the value. </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Functions</p>
+<dl class="cpp function">
+<dt id="_CPPv4N3vul8patterns17managed_singleton17managed_singletonEv">
+<span id="_CPPv3N3vul8patterns17managed_singleton17managed_singletonEv"></span><span id="_CPPv2N3vul8patterns17managed_singleton17managed_singletonEv"></span><span id="vul::patterns::managed_singleton::managed_singleton"></span><span class="target" id="classvul_1_1patterns_1_1managed__singleton_1a0e12e14cee3f02cd9c0f364f3a1ad70d"></span><code class="sig-name descname">managed_singleton</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul8patterns17managed_singleton17managed_singletonEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct the singleton with a default allocator. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3vul8patterns17managed_singleton17managed_singletonERK14allocator_type">
+<span id="_CPPv3N3vul8patterns17managed_singleton17managed_singletonERK14allocator_type"></span><span id="_CPPv2N3vul8patterns17managed_singleton17managed_singletonERK14allocator_type"></span><span id="vul::patterns::managed_singleton::managed_singleton__allocator_typeCR"></span><span class="target" id="classvul_1_1patterns_1_1managed__singleton_1a44348b2c3945fe6fc3ba23ab5c9c4cc5"></span><code class="sig-name descname">managed_singleton</code><span class="sig-paren">(</span><em class="property">const</em> <a class="reference internal" href="#_CPPv4N3vul8patterns17managed_singleton14allocator_typeE" title="vul::patterns::managed_singleton::allocator_type">allocator_type</a> &amp;<em>al</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul8patterns17managed_singleton17managed_singletonERK14allocator_type" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct the singleton, copying the allocator.</p>
+<p><dl class="simple">
+<dt><strong>Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">[in]</span> <span class="pre">al</span></code>: The allocator to copy into the singleton </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4IDpEN3vul8patterns17managed_singleton4initEiDp4Args">
+<span id="_CPPv3IDpEN3vul8patterns17managed_singleton4initEDp4Args"></span><span id="_CPPv2IDpEN3vul8patterns17managed_singleton4initEDp4Args"></span>template&lt;class ...<code class="sig-name descname">Args</code>&gt;<br /><span class="target" id="classvul_1_1patterns_1_1managed__singleton_1abe9597570c03576eaff12552a28c556f"></span>int <code class="sig-name descname">init</code><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4IDpEN3vul8patterns17managed_singleton4initEiDp4Args" title="vul::patterns::managed_singleton::init::Args">Args</a>... <em>args</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4IDpEN3vul8patterns17managed_singleton4initEiDp4Args" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Initialize the singleton with the given arguments. </p>
+<p>This function is used to construct the internal singleton value with the given arguments. First, free space is created to store the value. Then the object is constructed in-place.</p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>1 if the singleton was initialized, 0 otherwise. </p>
+</dd>
+<dt><strong>Template Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Args</span></code>: The argument types, passed to the value constructor. </p></li>
+</ul>
+</dd>
+<dt><strong>Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">[in]</span> <span class="pre">args</span></code>: The arguments, passed to the value constructor. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3vul8patterns17managed_singleton4termEv">
+<span id="_CPPv3N3vul8patterns17managed_singleton4termEv"></span><span id="_CPPv2N3vul8patterns17managed_singleton4termEv"></span><span id="vul::patterns::managed_singleton::term"></span><span class="target" id="classvul_1_1patterns_1_1managed__singleton_1ad84f7779e22a0a55a78d515fbe2a2767"></span>int <code class="sig-name descname">term</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul8patterns17managed_singleton4termEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Terminate the value, stored inside the singleton.</p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>1 if the value was terminated, 0 otherwise. </p>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Static Functions</p>
+<dl class="cpp function">
+<dt id="_CPPv4N3vul8patterns17managed_singleton3getEv">
+<span id="_CPPv3N3vul8patterns17managed_singleton3getEv"></span><span id="_CPPv2N3vul8patterns17managed_singleton3getEv"></span><span id="vul::patterns::managed_singleton::get"></span><span class="target" id="classvul_1_1patterns_1_1managed__singleton_1a2168c889a0198b84b7aaca8ea5cd761d"></span><a class="reference internal" href="#_CPPv4I0I0E0EN3vul8patterns17managed_singletonE" title="vul::patterns::managed_singleton::_Ty">_Ty</a> &amp;<code class="sig-name descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul8patterns17managed_singleton3getEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Get a value reference from the singleton. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3vul8patterns17managed_singleton3ptrEv">
+<span id="_CPPv3N3vul8patterns17managed_singleton3ptrEv"></span><span id="_CPPv2N3vul8patterns17managed_singleton3ptrEv"></span><span id="vul::patterns::managed_singleton::ptr"></span><span class="target" id="classvul_1_1patterns_1_1managed__singleton_1ac81ac1501119b6d171be9526b3c05735"></span><a class="reference internal" href="#_CPPv4I0I0E0EN3vul8patterns17managed_singletonE" title="vul::patterns::managed_singleton::_Ty">_Ty</a> *<code class="sig-name descname">ptr</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3vul8patterns17managed_singleton3ptrEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Get a value pointer from the singleton. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="raii.html" class="btn btn-neutral float-right" title="RAII" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="patterns.html" class="btn btn-neutral float-left" title="VUL Patterns" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, mcmikecreations
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -28,9 +28,9 @@ author = 'mcmikecreations'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [ 
-"breathe",
-"exhale"
+"breathe"
 ]
+#,"exhale"
 
 # Breathe Configuration
 breathe_default_project = "VividEngine"

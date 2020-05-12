@@ -1,10 +1,12 @@
 find_package(Doxygen REQUIRED)
+find_package(Sphinx REQUIRED)
 
 # Find all the public headers
-get_target_property(VIVID_PUBLIC_HEADER_DIR VividCore INTERFACE_INCLUDE_DIRECTORIES)
-file(GLOB_RECURSE VIVID_PUBLIC_HEADERS ${PROJECT_SOURCE_DIR}/VividCore/*.h)
+file(GLOB_RECURSE VIVID_PUBLIC_HEADERS ${PROJECT_SOURCE_DIR}/VividCore/*.h ${PROJECT_SOURCE_DIR}/vul/*.h)
 
-set(DOXYGEN_INPUT_DIR ${PROJECT_SOURCE_DIR}/VividCore)
+set(DOXYGEN_INPUT_DIR ${PROJECT_SOURCE_DIR}/VividCore\ ${PROJECT_SOURCE_DIR}/vul)
+set(DOXYGEN_EXCLUDE_DIR ${PROJECT_SOURCE_DIR}/vul/out\ ${PROJECT_SOURCE_DIR}/vul/tests)
+set(DOXYGEN_EXPAND_MACROS S_VUL\ E_VUL\ S_NAM\ E_NAM)
 set(DOXYGEN_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/doxygen)
 set(DOXYGEN_INDEX_FILE ${DOXYGEN_OUTPUT_DIR}/xml/index.xml)
 set(DOXYFILE_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
@@ -31,6 +33,8 @@ set(SPHINX_SOURCE ${CMAKE_CURRENT_SOURCE_DIR})
 set(SPHINX_BUILD ${CMAKE_CURRENT_BINARY_DIR}/sphinx)
 set(SPHINX_INDEX_FILE ${SPHINX_BUILD}/index.html)
 
+file(GLOB_RECURSE SPHINX_TRACKABLE vul/*.rst)
+
 # Only regenerate Sphinx when:
 # - Doxygen has rerun
 # - Our doc files have been updated
@@ -45,6 +49,7 @@ add_custom_command(OUTPUT ${SPHINX_INDEX_FILE}
                    DEPENDS
                    # Other docs files you want to track should go here (or in some variable)
                    ${CMAKE_CURRENT_SOURCE_DIR}/index.rst
+				   ${SPHINX_TRACKABLE}
                    ${DOXYGEN_INDEX_FILE}
                    MAIN_DEPENDENCY ${SPHINX_SOURCE}/conf.py
                    COMMENT "Generating documentation with Sphinx")
