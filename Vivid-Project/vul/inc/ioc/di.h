@@ -209,7 +209,7 @@ public:
 			}
 			else
 			{
-				std::get<di_basic_scope*>(*p)->set_scope(false);
+				return std::get<di_basic_scope*>(*p)->set_scope(false);
 			}
 		}
 		return 0;
@@ -234,7 +234,7 @@ public:
 			}
 			else
 			{
-				std::get<di_basic_scope*>(*p)->set_scope(false);
+				return std::get<di_basic_scope*>(*p)->set_scope(false);
 			}
 		}
 		return 0;
@@ -265,7 +265,7 @@ public:
 		return static_cast<di_scope<_T>*>(p->second(*this));
 	}
 	/** Construct a class using the values, provided by the IoC
-	Container.
+	Container. The value is not tracked by the memory manager.
 
 	\tparam _T The type of object to construct.
 	\tparam Args The arguments, that will be passed to the
