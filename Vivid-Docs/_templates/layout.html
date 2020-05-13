@@ -1,0 +1,9 @@
+{% extends '!layout.html' %}
+{% block extrahead %}
+{{super()}}
+    <link rel="stylesheet" href="/Vivid-Engine/_static/gh-fork-ribbon.min.css" />
+{% endblock %}
+{% block document %}
+{{super()}}
+<a href="https://github.com/mcmikecreations/Vivid-Engine" data-ribbon="GitHub Project" title="GitHub Project" class="github-fork-ribbon right-top">GitHub Project</a>
+{% endblock %}
