@@ -32,11 +32,12 @@ public:
 
 	\param[in] value The value indicating if this scope is
 	active.
-	\returns 1 if the function succeeded, 0 otherwise.
+	\returns success if the function succeeded, failure
+	otherwise.
 	*/
 	virtual int set_scope(bool value) override
 	{
-		return 1;
+		return (int)vul::error::success;
 	}
 };
 

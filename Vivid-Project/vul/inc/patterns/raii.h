@@ -3,6 +3,9 @@
 #include <utility>
 #include <type_traits>
 
+#include "errors.h"
+#include "helpers/trick_expand_type.h"
+
 namespace vul {
 namespace patterns {
 /// A dummy structure to indicate an empty initializer in raii.
@@ -27,11 +30,6 @@ class raii
 private:
 	_Ty& _value;
 	int _init;
-	template <class _F, class ..._Other>
-	struct first_type
-	{
-		using type = _F;
-	};
 public:
 	raii() = delete;
 	raii(const raii&) = delete;
@@ -42,7 +40,7 @@ public:
 	\param[in] value The value to wrap around with the raii
 	object.
 	*/
-	raii(_Ty&& value) : _value(value), _init(0)
+	raii(_Ty&& value) : _value(value), _init((int)vul::error::failure)
 	{ }
 	/** Construct the object, using an existing reference. Than
 	initialize this reference using the supplied arguments.
@@ -56,7 +54,7 @@ public:
 	template <class ...Args>
 	raii(_Ty&& value, Args... args) : _value(value)
 	{
-		if constexpr (sizeof...(Args) == (std::size_t)1 && std::is_same<first_type<Args...>::type, raii_dummy>::value)
+		if constexpr (sizeof...(Args) == (std::size_t)1 && std::is_same<vul::helpers::first_type<Args...>::type, raii_dummy>::value)
 		{
 			_init = _value.init();
 		}
@@ -68,7 +66,7 @@ public:
 	/// Calls termination routine of the stored value.
 	~raii()
 	{
-		if (_init) _value.term();
+		if (_init == (int)vul::error::success) _value.term();
 	}
 	/** Call the initialization routine of the stored reference
 	using the supplied arguments.
@@ -83,7 +81,7 @@ public:
 	template <class ...Args>
 	int init(Args... args)
 	{
-		if (_init) return 0;
+		if (_init == (int)vul::error::success) return (int)vul::error::failure;
 		return _init = _value.init(std::forward<Args>(args)...);
 	}
 	/** Call the termination routine of the stored reference.
@@ -93,16 +91,16 @@ public:
 	*/
 	int term()
 	{
-		if (_init == 0) return 0;
+		if (_init != (int)vul::error::success) return (int)vul::error::failure;
 		int t = _value.term();
-		if (t) [[likely]]
+		if (t == (int)vul::error::success) [[likely]]
 		{
 			_init = 0;
-			return 1;
+			return (int)vul::error::success;
 		}
 		else [[unlikely]]
 		{
-			return 0;
+			return (int)vul::error::failure;
 		}
 	}
 	/// Get the value reference, stored inside the raii object.

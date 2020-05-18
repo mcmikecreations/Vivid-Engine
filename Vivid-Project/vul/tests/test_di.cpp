@@ -6,6 +6,9 @@
 #include "patterns/raii.h"
 #include "patterns/managed_singleton.h"
 
+#include "errors.h"
+
+using namespace vul;
 using namespace vul::ioc;
 using namespace vul::patterns;
 
@@ -35,18 +38,18 @@ public:
 TEST_CASE("IoC Container runs", "[ioc]") {
     SECTION("constructing di") {
         di d;
-        REQUIRE(d.init() == 1);
-        REQUIRE(d.term() == 1);
+        REQUIRE(d.init() == error::success);
+        REQUIRE(d.term() == error::success);
     }
     SECTION("clearing di") {
         di d;
-        REQUIRE(d.init() == 1);
-        REQUIRE(d.clear() == 1);
-        REQUIRE(d.term() == 1);
+        REQUIRE(d.init() == error::success);
+        REQUIRE(d.clear() == error::success);
+        REQUIRE(d.term() == error::success);
     }
     SECTION("scope verification") {
         di d;
-        REQUIRE(d.add_transient<Repo, const_repo>() == 1);
+        REQUIRE(d.add_transient<Repo, const_repo>() == error::success);
         auto scope = d.get<Repo>();
         REQUIRE(scope != nullptr);
         REQUIRE(scope->is_scope() == true);
@@ -59,14 +62,14 @@ TEST_CASE("IoC Container runs", "[ioc]") {
     }
     SECTION("transient ioc injection") {
         di d;
-        REQUIRE(d.add_transient<Repo, const_repo>() == 1);
+        REQUIRE(d.add_transient<Repo, const_repo>() == error::success);
         {
             auto scope = d.get<Repo>();
             REQUIRE(scope != nullptr);
             auto value = scope->get();
             REQUIRE(value != nullptr);
             REQUIRE(value->get() == 5);
-            REQUIRE(d.free(scope) == 1);
+            REQUIRE(d.free(scope) == error::success);
         }
         {
             auto scope = d.get<Logger>();
@@ -76,21 +79,21 @@ TEST_CASE("IoC Container runs", "[ioc]") {
             auto repo1 = d.get<Repo>()->get();
             auto repo2 = d.get<Repo>()->get();
             REQUIRE(repo1 != repo2);
-            REQUIRE(d.free(repo1) == 1);
-            REQUIRE(d.free(repo2) == 1);
+            REQUIRE(d.free(repo1) == error::success);
+            REQUIRE(d.free(repo2) == error::success);
         }
         REQUIRE(d.term() == 1);
     }
     SECTION("singleton ioc injection") {
         di d;
-        REQUIRE(d.add_singleton<Repo, const_repo>() == 1);
+        REQUIRE(d.add_singleton<Repo, const_repo>() == error::success);
         {
             auto scope = d.get<Repo>();
             REQUIRE(scope != nullptr);
             auto value = scope->get();
             REQUIRE(value != nullptr);
             REQUIRE(value->get() == 5);
-            REQUIRE(d.free(scope) == 0);
+            REQUIRE(d.free(scope) == error::failure);
         }
         {
             auto scope = d.get<Logger>();
@@ -100,34 +103,34 @@ TEST_CASE("IoC Container runs", "[ioc]") {
             auto repo1 = d.get<Repo>()->get();
             auto repo2 = d.get<Repo>()->get();
             REQUIRE(repo1 == repo2);
-            REQUIRE(d.free(repo1) == 0);
-            REQUIRE(d.free(repo2) == 0);
+            REQUIRE(d.free(repo1) == error::failure);
+            REQUIRE(d.free(repo2) == error::failure);
         }
-        REQUIRE(d.term() == 1);
+        REQUIRE(d.term() == error::success);
     }
     SECTION("immediate cleaning") {
         {
             di d;
-            REQUIRE(d.add_transient<Repo, const_repo>() == 1);
+            REQUIRE(d.add_transient<Repo, const_repo>() == error::success);
             auto scope = d.get<Repo>();
             REQUIRE(scope != nullptr);
-            REQUIRE(d.free(scope, true) == 1);
-            REQUIRE(d.clear() == 1);
+            REQUIRE(d.free(scope, true) == error::success);
+            REQUIRE(d.clear() == error::success);
         }
         {
             di d;
-            REQUIRE(d.add_transient<Repo, const_repo>() == 1);
+            REQUIRE(d.add_transient<Repo, const_repo>() == error::success);
             auto scope = d.get<Repo>();
             REQUIRE(scope != nullptr);
-            REQUIRE(d.free(scope, false) == 1);
-            REQUIRE(d.clear() == 1);
+            REQUIRE(d.free(scope, false) == error::success);
+            REQUIRE(d.clear() == error::success);
         }
     }
     SECTION("raii") {
         {
             di d;
             raii<di> r(std::move(d), raii_dummy{});
-            REQUIRE(r->add_transient<Repo, const_repo>() == 1);
+            REQUIRE(r->add_transient<Repo, const_repo>() == error::success);
             auto scope = r->get<Repo>();
             REQUIRE(scope != nullptr);
             REQUIRE(scope->get() != nullptr);
@@ -139,11 +142,12 @@ TEST_CASE("IoC Container runs", "[ioc]") {
             using t = managed_singleton<di>;
             t m;
             raii<t> r(std::move(m), raii_dummy{});
-            REQUIRE(t::ptr()->add_transient<Repo, const_repo>() == 1);
+            REQUIRE(t::ptr()->add_transient<Repo, const_repo>() == error::success);
             auto scope = t::ptr()->get<Repo>();
             REQUIRE(scope != nullptr);
             REQUIRE(scope->get() != nullptr);
             REQUIRE(scope->get()->get() == 5);
         }
     }
+    //TODO - write tests to check all function returns.
 }

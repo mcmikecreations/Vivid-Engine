@@ -8,6 +8,7 @@
 #include <memory_resource>
 #include <algorithm>
 
+#include "errors.h"
 #include "ioc/di_scope.h"
 #include "ioc/di_scope_transient.h"
 #include "ioc/di_scope_singleton.h"
@@ -42,11 +43,19 @@ private:
 	> _class_map;
 	allocator_type<std::byte> _alloc;
 	cache_container_type _scope_cache;
+	di_scope_singleton<di> _this_scope;
+	bool _this_scope_is_scope;
 
 	template <class _T>
 	inline std::size_t key()
 	{
-		return typeid(_T).hash_code();
+		//cv-qualifiers are ignored for typeid, but this is done
+		//to explicitly show what is happening
+		using _U0 = std::remove_cv<_T>::type;
+		using _U1 = std::remove_reference<_U0>::type;
+		using _U2 = std::remove_pointer<_U1>::type;
+		using _U = _U2;
+		return typeid(_U).hash_code();
 	}
 
 	template <class _T>
@@ -56,12 +65,12 @@ private:
 		if (p == _class_map.end())
 		{
 			auto res = _class_map.insert(std::make_pair(key<_T>(), f));
-			return res.second;
+			return res.second ? (int)vul::error::success : (int)vul::error::failure;
 		}
 		else
 		{
 			p->second = f;
-			return 1;
+			return (int)vul::error::success;
 		}
 	}
 
@@ -79,7 +88,7 @@ private:
 					std::get<void*>(*p),
 					std::get<di_basic_scope*>(*p)
 					);
-				if (res)
+				if (res == (int)vul::error::success)
 				{
 					p = _scope_cache.erase(p);
 				}
@@ -94,30 +103,32 @@ private:
 				++p;
 			}
 		}
-		return failures == 0;
+		return failures == 0 ? (int)vul::error::success : (int)vul::error::failure;
 	}
 
 	int erase_scope(cache_container_type::const_iterator p)
 	{
-		if (p == _scope_cache.end()) return 0;
+		if (p == _scope_cache.end()) 
+			return (int)vul::error::value_empty;
 
 		di_basic_scope* m_scope = std::get<di_basic_scope*>(*p);
 		bool* m_bool = std::get<bool*>(*p);
 		m_scope->set_scope(false);
-
-		if (m_scope->is_scope()) return 0;
+		//We failed to change the scope state. Used for singleton.
+		if (m_scope->is_scope()) 
+			return (int)vul::error::failure;
 
 		int res = std::get<cache_destructor_type>(*p)(
 			m_bool,
 			std::get<void*>(*p),
 			m_scope
 			);
-		if (res)
+		if (res == (int)vul::error::success)
 		{
 			_scope_cache.erase(p);
 			return res;
 		}
-		return 0;
+		return (int)vul::error::failure;
 	}
 
 	int insert_cache(const cache_value_type& value)
@@ -125,7 +136,7 @@ private:
 		auto p = _scope_cache.insert(
 			value
 		);
-		return std::get<bool>(p);
+		return std::get<bool>(p) ? (int)vul::error::success : (int)vul::error::failure;
 	}
 
 	auto find_cache(di_basic_scope* scope)
@@ -172,34 +183,36 @@ public:
 		: _memory(resource),
 		_class_map(resource),
 		_alloc(resource),
-		_scope_cache(resource)
+		_scope_cache(resource),
+		_this_scope(&_this_scope_is_scope, this, this)
 	{}
 	/** Initialize the IoC Container.
 	
-	\returns 1 if succeeded, 0 otherwise.
+	\returns success if succeeded, failure otherwise.
 	*/
-	int init() { return 1; }
+	int init() { return (int)vul::error::success; }
 	/** Call termination routine of the IoC Container, clear
 	scope and mapping cache.
 	
-	\returns 1 if succeeded, 0 otherwise.
+	\returns success if succeeded, error otherwise.
 	*/
-	int term()
-	{
-		return erase_scopes(true);
-	}
+	int term() { return erase_scopes(true); }
 
 	/** Manually free the scope from the IoC Container cache.
 
 	\param[in] scope The scope to free from cache.
 	\param[in] immediate Whether to free the value immediately
 	or scedule it for the next cache clear routine.
-	\returns 1 if succeeded, 0 otherwise.
+	\exception error::value_empty A nullptr scope was given.
+	\exception error::context_mismatch DI context of scope
+	doesn't match.
+	\exception error::failure Din't free the scope.
+	\returns success if succeeded, error otherwise.
 	*/
 	int free(di_basic_scope* scope, bool immediate = true)
 	{
-		if (scope == nullptr) return 0;
-		if (scope->di() != (void*)this) return 0;
+		if (scope == nullptr) return (int)vul::error::value_empty;
+		if (scope->di() != (void*)this) return (int)vul::error::context_mismatch;
 		auto p = find_cache(scope);
 		if (p != _scope_cache.end())
 		{
@@ -212,7 +225,7 @@ public:
 				return std::get<di_basic_scope*>(*p)->set_scope(false);
 			}
 		}
-		return 0;
+		return (int)vul::error::failure;
 	}
 
 	/** Manually free the value from the IoC Container cache.
@@ -220,11 +233,15 @@ public:
 	\param[in] value The value to free from cache.
 	\param[in] immediate Whether to free the value immediately
 	or scedule it for the next cache clear routine.
-	\returns 1 if succeeded, 0 otherwise.
+	\exception error::value_empty A nullptr scope was given.
+	\exception error::context_mismatch DI context of scope
+	doesn't match.
+	\exception error::failure Din't free the scope.
+	\returns success if succeeded, error otherwise.
 	*/
 	int free(void* value, bool immediate = true)
 	{
-		if (value == nullptr) return 0;
+		if (value == nullptr) return (int)vul::error::value_empty;
 		auto p = find_cache_value(value);
 		if (p != _scope_cache.end())
 		{
@@ -237,13 +254,13 @@ public:
 				return std::get<di_basic_scope*>(*p)->set_scope(false);
 			}
 		}
-		return 0;
+		return (int)vul::error::failure;
 	}
 
 	/** Clears scope cache of the IoC Container, leaves mapping
 	cache intact.
 
-	\returns 1 if succeeded, 0 otherwise.
+	\returns success if succeeded, error otherwise.
 	*/
 	int clear()
 	{
@@ -260,6 +277,7 @@ public:
 	di_scope<_T>* get()
 	{
 		std::size_t _key = key<_T>();
+		if (_key == key<di>()) return dynamic_cast<di_scope<_T>*>(&_this_scope);
 		auto p = _class_map.find(_key);
 		if (p == _class_map.end()) return nullptr;
 		return static_cast<di_scope<_T>*>(p->second(*this));
@@ -318,6 +336,7 @@ public:
 	construction. All arguments are constructed by the IoC
 	Container, so it is not possible to pass additional
 	arguments.
+	\returns success if added, failure otherwise.
 	*/
 	template <class _InT, class _ImV, class ...Args>
 	int add_transient()
@@ -402,6 +421,7 @@ public:
 	construction. All arguments are constructed by the IoC
 	Container, so it is not possible to pass additional
 	arguments.
+	\returns success if added, failure otherwise.
 	*/
 	template <class _InT, class _ImV, class ...Args>
 	int add_singleton()

@@ -4,6 +4,7 @@
 #include <type_traits>
 
 #include "core.h"
+#include "errors.h"
 
 namespace vul {
 namespace patterns {
@@ -59,30 +60,32 @@ public:
 	constructor.
 	\param[in] args The arguments, passed to the value
 	constructor.
-	\returns 1 if the singleton was initialized, 0 otherwise.
+	\returns success if the singleton was initialized, error
+	otherwise.
 	*/
 	template<class ...Args>
 	int init(Args... args)
 	{
-		if (_init) return 0;
+		if (_init) return (int)vul::error::failure;
 		_value = _Alty_traits::allocate(_allocator, 1);
-		if (_value == nullptr) return 0;
+		if (_value == nullptr) return (int)vul::error::value_empty;
 		_Alty_traits::construct(_allocator, _value, std::forward<Args>(args)...);
 		_init = true;
-		return 1;
+		return (int)vul::error::success;
 	}
 	/** Terminate the value, stored inside the singleton.
 
-	\returns 1 if the value was terminated, 0 otherwise.
+	\returns success if the value was terminated, failure
+	otherwise.
 	*/
 	int term()
 	{
-		if (!_init) return 0;
+		if (!_init) return (int)vul::error::failure;
 		_Alty_traits::destroy(_allocator, _value);
 		_Alty_traits::deallocate(_allocator, _value, 1);
 		_value = nullptr;
 		_init = false;
-		return 1;
+		return (int)vul::error::success;
 	}
 	/// Get a value reference from the singleton.
 	static _Ty& get()

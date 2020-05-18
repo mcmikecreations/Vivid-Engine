@@ -2,6 +2,7 @@
 
 #include "patterns/managed_singleton.h"
 
+using namespace vul;
 using namespace vul::patterns;
 
 TEST_CASE("Singleton runs", "[patterns][memory]") {
@@ -11,20 +12,20 @@ TEST_CASE("Singleton runs", "[patterns][memory]") {
     SECTION("getting value from singleton") {
         managed_singleton<int> a;
         int i = 5;
-        REQUIRE(a.init(i) == 1);
+        REQUIRE(a.init(i) == error::success);
         REQUIRE(managed_singleton<int>::get() == i);
-        REQUIRE(a.term() == 1);
+        REQUIRE(a.term() == error::success);
     }
     SECTION("testing function returns") {
         managed_singleton<std::uint16_t> a;
         std::uint16_t i(6);
-        REQUIRE(a.term() == 0);
-        REQUIRE(a.init(i) == 1);
+        REQUIRE(a.term() == error::failure);
+        REQUIRE(a.init(i) == error::success);
         REQUIRE(managed_singleton<std::uint16_t>::get() == i);
-        REQUIRE(a.init(i + 1) == 0);
+        REQUIRE(a.init(i + 1) == error::failure);
         REQUIRE(managed_singleton<std::uint16_t>::get() == i);
         REQUIRE(managed_singleton<std::uint16_t>::ptr()
             == managed_singleton<std::uint16_t>::ptr());
-        REQUIRE(a.term() == 1);
+        REQUIRE(a.term() == error::success);
     }
 }
