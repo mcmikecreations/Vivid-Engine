@@ -6,15 +6,17 @@ VUL IoC
 
 IoC principle is realized in this library as an IoC Container.
 
-- Is non-intrusive (does not use preprocessor directives / special types).
+- Is non-intrusive (you don't have to modify your classes to work with `di`).
 - Exception-less (can be compiled with :code:`-fno-exceptions`).
 - Lightweight (around 12 bytes for each object apart from the object itself).
 - Supports both transient and singleton lifetime.
 - Has built-in memory management.
 - Uses C++20 features.
 
-Usage
------
+Basic example
+-------------
+
+For more examples, see :ref:`vul-di-examples-my`.
 
 Let's assume we have the classes, listed below.
 

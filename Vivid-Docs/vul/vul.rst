@@ -24,3 +24,4 @@ Some of its most memorable features are: *COMING SOON*.
 
    patterns/patterns
    ioc/ioc
+   ioc/ioc_examples
