@@ -13,3 +13,6 @@
 [submodule "Vivid-Project/Libs/di"]
 	path = Vivid-Project/Libs/di
 	url = https://github.com/boost-experimental/di.git
+[submodule "Vivid-Project/vul/nanoid_cpp"]
+	path = Vivid-Project/vul/nanoid_cpp
+	url = https://github.com/mcmikecreations/nanoid_cpp.git
